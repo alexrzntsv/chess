@@ -1,10 +1,76 @@
 import pygame
+import os
 from pygame.locals import *
 
-class Chess_piece:
-    def __init__(self, piece_type, color_type):
-        pass
+game_folder = os.path.dirname(__file__)
+img_folder = os.path.join(game_folder)
 
+class Chess_piece(pygame.sprite.Sprite):
+    def __init__(self, piece_type, color_type, cell_exm):
+        pygame.sprite.Sprite.__init__(self)
+        self.cell_exm = cell_exm
+        self.piece_type = piece_type
+        self.color_type = color_type
+
+class Pawn(Chess_piece):
+    def __init__(self, color):
+        self.color_type = color
+        if self.color_type == "Black":
+            self.image_name = "pawn_b.png"
+        elif self.color_type == "White":
+            self.image_name = "pawn_w.png"
+
+    def load_unit(self, cell):
+        self.size=Life.return_arg("cell_size")
+        pygame.sprite.Sprite.__init__(self)
+        player_img = pygame.image.load(os.path.join(img_folder, self.image_name)).convert()
+        self.x=cell[0]
+        self.y = cell[1]
+        self.image = player_img
+
+        self.rect = self.image.get_rect()
+        self.rect.centerx = 70 + self.size * self.x + self.size//3
+        self.rect.bottom = 70 + self.size * self.y + self.size//3
+
+class Knight(Chess_piece):
+    def __init__(self, color):
+        self.color_type = color
+        if self.color_type == "Black":
+            self.image_name = "khight_b.png"
+        elif self.color_type == "White":
+            self.image_name = "khight_w.png"
+
+class Queen(Chess_piece):
+    def __init__(self, color):
+        self.color_type = color
+        if self.color_type == "Black":
+            self.image_name = "queen_b.png"
+        elif self.color_type == "White":
+            self.image_name = "queen_w.png"
+
+class King(Chess_piece):
+    def __init__(self, color):
+        self.color_type = color
+        if self.color_type == "Black":
+            self.image_name = "king_b.png"
+        elif self.color_type == "White":
+            self.image_name = "king_w.png"
+
+class Bishop(Chess_piece):
+    def __init__(self, color):
+        self.color_type = color
+        if self.color_type == "Black":
+            self.image_name = "bishop_b.png"
+        elif self.color_type == "White":
+            self.image_name = "bishop_w.png"
+
+class Rook(Chess_piece):
+    def __init__(self, color):
+        self.color_type = color
+        if self.color_type == "Black":
+            self.image_name = "rook_b.png"
+        elif self.color_type == "White":
+            self.image_name = "rook_w.png"
 
 class Cell:
     def __init__(self, position_x = 0, position_y = 0, piece_type = "None", color_type = "None"):
@@ -12,16 +78,21 @@ class Cell:
         self.position_y = position_y
         self.piece_type = piece_type
         self.color_type = color_type
-        Cell_unit = Chess_piece(self.piece_type, self.color_type)
+
+    def position(self):
+        return (70 + self.position_x * Life.return_arg("cell_size") +Life.return_arg("cell_size")//3,
+                70 + self.position_y * Life.return_arg("cell_size") +Life.return_arg("cell_size")//3)
+
     def highlite(self, type):
         self.type = type
         if type == "Attack":
             color = (255, 0, 0, 128)
         elif type == "Cell selection":
             color = (255, 255, 0, 128)
-        pygame.draw.rect(Life.surface_alpha(), color, (70 + self.position_x * Life.cell_size_xy(),
-            70 + self.position_y * Life.cell_size_xy(), Life.cell_size_xy(), Life.cell_size_xy()))
-        self.screen.blit(Life.surface_alpha(), (0, 0) )
+        pygame.draw.rect(Life.return_arg("surface1"), color, (70 + self.position_x * Life.return_arg("cell_size"),
+            70 + self.position_y * Life.return_arg("cell_size"), Life.return_arg("cell_size"), Life.return_arg("cell_size")))
+        screen = Life.return_arg("screen")
+        screen.screen.blit(Life.return_arg("surface1"), (0, 0) )
 
 class Life:
     def __init__(self, width=200, height=400, cell_size=20, fps=5):
@@ -40,10 +111,19 @@ class Life:
         self.surface1 = self.screen.convert_alpha()
         self.surface1.fill([0, 0, 0, 0])
 
-    def surface_alpha(self):
-        return self.surface1
-    def cell_size_xy(self):
-        return self.cell_size
+        self.surface2 = pygame.display.set_mode(self.screen_size)
+
+    @classmethod
+    def return_arg(cls, name):
+
+        if name == "surface1":
+            return self.surface1
+        elif name == "cell_size":
+            return cls.cell_size
+        elif name == "screen":
+            return self.screen
+        elif name == "surface2":
+            return self.surface2
 
     def make_board(self):
         numbers_list = ['8', '7', '6', '5', '4', '3', '2', '1']
@@ -80,20 +160,43 @@ class Life:
             self.screen.blit(text_2, text_2_pos)
             counter_y += 1
 
+    def make_units(self):
+        for x in range(8):
+            for y in range(8):
+                if y == 1:
+                    player = Pawn("black")
+                    cell = Cell(x, y, "Pawn", "black")
+                    Pawn.load_unit((x, y), (x, y))
+                    self.all_sprites.add(player)
+                if y == 7:
+                    player = Pawn("white")
+                    cell = Cell(x, y, "Pawn", "white")
+                    Pawn.load_unit(cell)
+                    self.all_sprites.add(player)
+
+
 
     def run_game(self):
         pygame.init()
         #clock = pygame.time.Clock()
+        self.all_sprites = pygame.sprite.Group()
         pygame.display.set_caption('Life')
         self.screen.fill(pygame.Color('white'))
+
         game = True
         while game:
+
+
+
             for event in pygame.event.get():
                 if event.type == QUIT:
                     game = False
 
-            self.make_board()
+            self.all_sprites.update()
 
+            self.make_board()
+            self.make_units()
+            self.all_sprites.draw(self.screen)
             pygame.display.flip()
             #clock.tick(self.fps)
         pygame.quit()
