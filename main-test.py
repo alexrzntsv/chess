@@ -3,7 +3,7 @@ import os
 from pygame.locals import *
 
 game_folder = os.path.dirname(__file__)
-img_folder = os.path.join(game_folder)
+img_folder = os.path.join(game_folder, 'img')
 
 class Chess_piece(pygame.sprite.Sprite):
     def __init__(self, piece_type, color_type, cell_exm):
