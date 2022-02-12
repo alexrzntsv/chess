@@ -186,7 +186,8 @@ class Cell:
         pygame.draw.rect(game.return_arg("surface1"), color, (70 + self.position_x * game.return_arg("cell_size"),
             70 + self.position_y * game.return_arg("cell_size"), game.return_arg("cell_size"), game.return_arg("cell_size")))
         screen = game.return_arg("screen")
-        screen.screen.blit(game.return_arg("surface1"), (0, 0) )
+
+        screen.blit(game.return_arg("surface1"), (0, 0) )
 
 class Life:
     def __init__(self, width=200, height=400, cell_size=20, fps=5):
