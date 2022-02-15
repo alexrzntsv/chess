@@ -13,7 +13,7 @@ class Chess():
         self.color_type = color
         self.image_name = image_name
         self.image = pygame.image.load(os.path.join(img_folder, self.image_name)).convert()
-        self.image = pygame.transform.scale(self.image, (game.return_arg("cell_size"), game.return_arg("cell_size")))
+        self.image = pygame.transform.scale(self.image, (game.cell_size, game.cell_size))
         if self.color_type == "black":
             self.image.set_colorkey((255, 255, 255))
         elif self.color_type == "white":
@@ -24,7 +24,7 @@ class Chess():
         return self.rect
 
     def load_unit(self, cell, rect):
-        self.size = game.return_arg("cell_size")
+        self.size = game.cell_size
         self.x = cell[0]
         self.y = cell[1]
         self.rect = rect
@@ -35,6 +35,7 @@ class Chess():
 class Pawn(pygame.sprite.Sprite):
     def __init__(self, color):
         pygame.sprite.Sprite.__init__(self)
+        self.description = color + " " + "Pawn"
         self.color_type = color
         if self.color_type == "black":
             self.image_name = "pawn_b.png"
@@ -43,10 +44,10 @@ class Pawn(pygame.sprite.Sprite):
         else: raise ValueError("No color")
         self.rect = Chess.set_sprite(self, self.image_name, self.color_type)
 
-
 class Knight(pygame.sprite.Sprite):
     def __init__(self, color):
         pygame.sprite.Sprite.__init__(self)
+        self.description = color + " " + "Knight"
         self.color_type = color
         if self.color_type == "black":
             self.image_name = "knight_b.png"
@@ -59,6 +60,7 @@ class Knight(pygame.sprite.Sprite):
 class Queen(pygame.sprite.Sprite):
     def __init__(self, color):
         pygame.sprite.Sprite.__init__(self)
+        self.description = color + " " + "Queen"
         self.color_type = color
         if self.color_type == "black":
             self.image_name = "queen_b.png"
@@ -71,6 +73,7 @@ class Queen(pygame.sprite.Sprite):
 class King(pygame.sprite.Sprite):
     def __init__(self, color):
         pygame.sprite.Sprite.__init__(self)
+        self.description = color + " " + "King"
         self.color_type = color
         if self.color_type == "black":
             self.image_name = "king_b.png"
@@ -83,6 +86,7 @@ class King(pygame.sprite.Sprite):
 class Bishop(pygame.sprite.Sprite):
     def __init__(self, color):
         pygame.sprite.Sprite.__init__(self)
+        self.description = color + " " + "Bishop"
         self.color_type = color
         if self.color_type == "black":
             self.image_name = "bishop_b.png"
@@ -95,6 +99,7 @@ class Bishop(pygame.sprite.Sprite):
 class Rook(pygame.sprite.Sprite):
     def __init__(self, color):
         pygame.sprite.Sprite.__init__(self)
+        self.description = color + " " + "Rook"
         self.color_type = color
         if self.color_type == "black":
             self.image_name = "rook_b.png"
@@ -105,16 +110,31 @@ class Rook(pygame.sprite.Sprite):
         self.rect = Chess.set_sprite(self, self.image_name, self.color_type)
 
 class Cell:
-    def __init__(self, position_x = 0, position_y = 0, piece_type = "None", color_type = "None"):
+    def __init__(self, position_x = 0, position_y = 0, piece = "None", previous = "None"):
         self.position_x = position_x
         self.position_y = position_y
-        self.piece_type = piece_type
-        self.color_type = color_type
-        self.desribtion = (str(self.position_x) + " " + str(self.position_y) + " " + str(self.piece_type) + " " + str(self.color_type))
+        self.piece = piece
+        self.previous = previous
+        if self.piece != "None":
+            self.desribtion = (str(self.position_x) + " " + str(self.position_y) + " " + self.piece.description)
+        else: self.desribtion = (str(self.position_x) + " " + str(self.position_y) + " " + self.piece)
 
     def position(self):
-        return (70 + self.position_x * game.return_arg("cell_size") +game.return_arg("cell_size")//3,
-                70 + self.position_y * game.return_arg("cell_size") +game.return_arg("cell_size")//3)
+        return (70 + self.position_x * game.cell_size + game.cell_size//3,
+                70 + self.position_y * game.cell_size + game.cell_size//3)
+    def update(self, new_piece):
+        self.previous = self.piece
+        if self.piece != "None":
+            self.piece.kill()
+        self.piece = new_piece
+        Chess.load_unit(self, (self.position_x, self.position_y), self.piece.rect)
+
+    def load_previous(self):
+        if self.previous != "None":
+            self.piece = self.previous
+            self.previous = "None"
+            Chess.load_unit(self, (self.position_x, self.position_y), self.piece.rect)
+        else: print("Ошибка")
 
     def highlite(self, type):
         self.type = type
@@ -122,10 +142,14 @@ class Cell:
             color = (255, 0, 0, 128)
         elif type == "Cell selection":
             color = (255, 255, 0, 128)
-        pygame.draw.rect(game.return_arg("surface1"), color, (70 + self.position_x * game.return_arg("cell_size"),
-            70 + self.position_y * game.return_arg("cell_size"), game.return_arg("cell_size"), game.return_arg("cell_size")))
-        screen = game.return_arg("screen")
-        screen.blit(game.return_arg("surface1"), (0, 0) )
+        pygame.draw.rect(game.surface1, color, (70 + self.position_x * game.cell_size,
+            70 + self.position_y * game.cell_size, game.cell_size, game.cell_size))
+        screen = game.screen
+        screen.blit(game.surface1, (0, 0) )
+
+    def delete(self):
+        self.previous = self.piece
+        self.piece == "None"
 
 class Life:
     def __init__(self, width=200, height=400, cell_size=20, fps=5):
@@ -145,16 +169,6 @@ class Life:
         self.surface1.fill([0, 0, 0, 0])
 
         self.surface2 = pygame.display.set_mode(self.screen_size)
-
-    def return_arg(self, name):
-        if name == "surface1":
-            return self.surface1
-        elif name == "cell_size":
-            return self.cell_size
-        elif name == "screen":
-            return self.screen
-        elif name == "surface2":
-            return self.surface2
 
     def make_board(self):
         numbers_list = ['8', '7', '6', '5', '4', '3', '2', '1']
@@ -201,64 +215,64 @@ class Life:
             for y in range(8):
                 if y == 1:
                     pawn = Pawn('black')
-                    self.cell_table[x][y] = Cell(x, y, "Pawn", "black")
+                    self.cell_table[x][y] = Cell(x, y, pawn)
                     Chess.load_unit(self, (x, y), pawn.rect)
                     self.all_sprites.add(pawn)
                 elif y == 6:
                     pawn = Pawn("white")
-                    self.cell_table[x][y] = Cell(x, y, "Pawn", "white")
+                    self.cell_table[x][y] = Cell(x, y, pawn)
                     Chess.load_unit(self, (x, y), pawn.rect)
                     self.all_sprites.add(pawn)
                 elif y == 0:
                     if x == 0 or x == 7:
                         rook = Rook("black")
-                        self.cell_table[x][y] = Cell(x, y, "Rook", "black")
+                        self.cell_table[x][y] = Cell(x, y, rook)
                         Chess.load_unit(self, (x, y), rook.rect)
                         self.all_sprites.add(rook)
                     if x == 1 or x == 6:
                         knight = Knight("black")
-                        self.cell_table[x][y] = Cell(x, y, "Knight", "black")
+                        self.cell_table[x][y] = Cell(x, y, knight)
                         Chess.load_unit(self, (x, y), knight.rect)
                         self.all_sprites.add(knight)
                     if x == 2 or x == 5:
                         bishop = Bishop("black")
-                        self.cell_table[x][y] = Cell(x, y, "Bishop", "black")
+                        self.cell_table[x][y] = Cell(x, y, bishop)
                         Chess.load_unit(self, (x, y), bishop.rect)
                         self.all_sprites.add(bishop)
                     if x == 3:
                         queen = Queen("black")
-                        self.cell_table[x][y] = Cell(x, y, "Queen", "black")
+                        self.cell_table[x][y] = Cell(x, y, queen)
                         Chess.load_unit(self, (x, y), queen.rect)
                         self.all_sprites.add(queen)
                     if x == 4:
                         king = King("black")
-                        self.cell_table[x][y] = Cell(x, y, "King", "black")
+                        self.cell_table[x][y] = Cell(x, y, king)
                         Chess.load_unit(self, (x, y), king.rect)
                         self.all_sprites.add(king)
                 elif y == 7:
                     if x == 0 or x == 7:
                         rook = Rook("white")
-                        self.cell_table[x][y] = Cell(x, y, "Rook", "white")
+                        self.cell_table[x][y] = Cell(x, y, rook)
                         Chess.load_unit(self, (x, y), rook.rect)
                         self.all_sprites.add(rook)
                     if x == 1 or x == 6:
                         knight = Knight("white")
-                        self.cell_table[x][y] = Cell(x, y, "Knight", "white")
+                        self.cell_table[x][y] = Cell(x, y, knight)
                         Chess.load_unit(self, (x, y), knight.rect)
                         self.all_sprites.add(knight)
                     if x == 2 or x == 5:
                         bishop = Bishop("white")
-                        self.cell_table[x][y] = Cell(x, y, "Bishop", "white")
+                        self.cell_table[x][y] = Cell(x, y, bishop)
                         Chess.load_unit(self, (x, y), bishop.rect)
                         self.all_sprites.add(bishop)
                     if x == 3:
                         queen = Queen("white")
-                        self.cell_table[x][y] = Cell(x, y, "Queen", "white")
+                        self.cell_table[x][y] = Cell(x, y, queen)
                         Chess.load_unit(self, (x, y), queen.rect)
                         self.all_sprites.add(queen)
                     if x == 4:
                         king = King("white")
-                        self.cell_table[x][y] = Cell(x, y, "King", "white")
+                        self.cell_table[x][y] = Cell(x, y, king)
                         Chess.load_unit(self, (x, y), king.rect)
                         self.all_sprites.add(king)
 
