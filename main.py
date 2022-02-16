@@ -15,7 +15,7 @@ class Chess():
         self.image = pygame.image.load(os.path.join(img_folder, self.image_name)).convert()
         self.image = pygame.transform.scale(self.image, (game.cell_size, game.cell_size))
         if self.color_type == "black":
-            self.image.set_colorkey((255, 255, 255))
+            self.image.set_colorkey((0, 0, 0))
         elif self.color_type == "white":
             self.image.set_colorkey((0, 0, 0))
         else:
@@ -137,7 +137,40 @@ class Cell:
             Chess.load_unit(self, (self.position_x, self.position_y), self.piece.rect)
         else: print("Ошибка")
 
-    def highlite(self, type):
+    def show_variants(self):
+        if isinstance(self.piece, Pawn):
+            selected_list =  ([[self.position_x, self.position_y - 1],[self.position_x , self.position_y - 2]]
+                    if self.piece.color_type == 'white' else
+                    [[self.position_x, self.position_y + 1],[self.position_x, self.position_y + 2]])
+        elif isinstance(self.piece, Knight):
+            selected_list = [[self.position_x + 2, self.position_y - 1], [self.position_x + 2, self.position_y + 1],
+                    [self.position_x - 2, self.position_y - 1], [self.position_x - 2, self.position_y + 1],
+                    [self.position_x + 1, self.position_y + 2], [self.position_x - 1, self.position_y + 2],
+                    [self.position_x + 1, self.position_y - 2], [self.position_x - 1, self.position_y - 2]]
+        elif isinstance(self.piece, King):
+            selected_list = [[self.position_x + 1, self.position_y], [self.position_x - 1, self.position_y],
+                    [self.position_x, self.position_y - 1], [self.position_x, self.position_y + 1],
+                    [self.position_x + 1, self.position_y + 1], [self.position_x - 1, self.position_y - 1],
+                    [self.position_x + 1, self.position_y - 1], [self.position_x - 1, self.position_y + 1]]
+        elif isinstance(self.piece, Queen):
+            selected_list = [[i, self.position_y] for i in range(8)] + [[self.position_x, i] for i in range(8)]
+            d1 = 1
+            while self.position_x + d1 in list(range(1, 7)) and self.position_y + d1 in list(range(1, 7)):
+                selected_list += [[self.position_x + d1, self.position_y + d1]]
+                d1 += 1
+            d2 = 1
+            while self.position_x + d2 not in [0, 7] and self.position_y - d2 not in [0, 7] :
+                selected_list += [[self.position_x + d2, self.position_y - d2]]
+                d2 += 1
+        return selected_list
+
+
+        '''if self.piece.color_type == 'black':
+                return 'Yes'
+            elif self.piece:
+                return 'No'''''
+
+    '''def highlite(self, type):
         self.type = type
         if type == "Attack":
             color = (255, 0, 0, 128)
@@ -146,7 +179,7 @@ class Cell:
         pygame.draw.rect(game.surface1, color, (70 + self.position_x * game.cell_size,
             70 + self.position_y * game.cell_size, game.cell_size, game.cell_size))
         screen = game.screen
-        screen.blit(game.surface1, (0, 0) )
+        screen.blit(game.surface1, (0, 0) )'''
 
     def delete(self):
         self.previous = self.piece
@@ -168,8 +201,10 @@ class CellList:
         for row in range(len(cell_list)):
             for column in range(len(cell_list[row])):
                 if cell_list[row][column].state == 'Selected':
-                    pygame.draw.rect(self.surface, pygame.Color('green'), (row * self.cell_size + 70, column * self.cell_size + 70,
-                                      self.cell_size - 1, self.cell_size - 1))
+                    selected_list = cell_list[row][column].show_variants()
+                    for i in selected_list:
+                        pygame.draw.rect(self.surface, pygame.Color('green'), (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
+                                                                               self.cell_size - 1, self.cell_size - 1))
 
 class Life:
     def __init__(self, width=200, height=400, cell_size=20, fps=5):
@@ -314,12 +349,13 @@ class Life:
 
                     self.cell_table.list[x_pos][y_pos].state = 'Selected'
 
-
             self.all_sprites.update()
             self.make_board()
+            self.cell_table.draw()
+            self.screen.blit(self.surface1, (0, 0))
             self.make_units()
             self.all_sprites.draw(self.screen)
-            self.cell_table.draw()
+
             pygame.display.flip()
             #clock.tick(self.fps)
         pygame.quit()
