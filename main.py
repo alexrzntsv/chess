@@ -137,7 +137,7 @@ class Cell:
             Chess.load_unit(self, (self.position_x, self.position_y), self.piece.rect)
         else: print("Ошибка")
 
-    def show_variants(self):
+    def show_variants(self, current_list):
         def bishop():
             lst = list(range(0, 8))
             res = []
@@ -185,7 +185,14 @@ class Cell:
             selected_list = bishop()
 
         #проверка выхода подсвеченных клеток за границы поля
-        selected_list[:] = [i for i in selected_list if all(item in list(range(0, 8)) for item in i)]
+        selected_list[:] = [i for i in selected_list if (all(item in list(range(0, 8)) for item in i))]
+        # проверка на заполнение клеток с фигурами того же цвета
+        for i in reversed(selected_list):
+            try:
+                if current_list[i[0]][i[1]].piece.color_type == self.piece.color_type:
+                    selected_list.remove(i)
+            except AttributeError:
+                pass
 
         return selected_list
 
@@ -226,7 +233,7 @@ class CellList:
         for row in range(len(cell_list)):
             for column in range(len(cell_list[row])):
                 if cell_list[row][column].state == 'Selected' and cell_list[row][column].piece != 'None':
-                    selected_list = cell_list[row][column].show_variants()
+                    selected_list = cell_list[row][column].show_variants(cell_list)
                     for i in selected_list:
                         pygame.draw.rect(self.surface, pygame.Color('green'), (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
                                                                                self.cell_size - 1, self.cell_size - 1))
@@ -362,9 +369,9 @@ class Life:
         self.all_sprites = pygame.sprite.Group()
         pygame.display.set_caption('Chess')
         self.screen.fill(pygame.Color('white'))
-
         game = True
         while game:
+            self.make_units()
             for event in pygame.event.get():
                 if event.type == QUIT:
                     game = False
@@ -378,7 +385,7 @@ class Life:
             self.make_board()
             self.cell_table.draw()
             self.screen.blit(self.surface1, (0, 0))
-            self.make_units()
+            #self.make_units()
             self.all_sprites.draw(self.screen)
 
             pygame.display.flip()
