@@ -138,8 +138,29 @@ class Cell:
         else: print("Ошибка")
 
     def show_variants(self):
+        def bishop():
+            lst = list(range(0, 8))
+            res = []
+            d1 = 1
+            while self.position_x + d1 in lst and self.position_y + d1 in lst:
+                res += [[self.position_x + d1, self.position_y + d1]]
+                d1 += 1
+            d2 = 1
+            while self.position_x + d2 in lst and self.position_y - d2 in lst:
+                res += [[self.position_x + d2, self.position_y - d2]]
+                d2 += 1
+            d3 = 1
+            while self.position_x - d3 in lst and self.position_y + d3 in lst:
+                res += [[self.position_x - d3, self.position_y + d3]]
+                d3 += 1
+            d4 = 1
+            while self.position_x - d4 in lst and self.position_y - d4 in lst:
+                res += [[self.position_x - d4, self.position_y - d4]]
+                d4 += 1
+            return res
+
         if isinstance(self.piece, Pawn):
-            selected_list =  ([[self.position_x, self.position_y - 1],[self.position_x , self.position_y - 2]]
+            selected_list = ([[self.position_x, self.position_y - 1],[self.position_x , self.position_y - 2]]
                     if self.piece.color_type == 'white' else
                     [[self.position_x, self.position_y + 1],[self.position_x, self.position_y + 2]])
         elif isinstance(self.piece, Knight):
@@ -152,16 +173,17 @@ class Cell:
                     [self.position_x, self.position_y - 1], [self.position_x, self.position_y + 1],
                     [self.position_x + 1, self.position_y + 1], [self.position_x - 1, self.position_y - 1],
                     [self.position_x + 1, self.position_y - 1], [self.position_x - 1, self.position_y + 1]]
+
         elif isinstance(self.piece, Queen):
             selected_list = [[i, self.position_y] for i in range(8)] + [[self.position_x, i] for i in range(8)]
-            d1 = 1
-            while self.position_x + d1 in list(range(1, 7)) and self.position_y + d1 in list(range(1, 7)):
-                selected_list += [[self.position_x + d1, self.position_y + d1]]
-                d1 += 1
-            d2 = 1
-            while self.position_x + d2 not in [0, 7] and self.position_y - d2 not in [0, 7] :
-                selected_list += [[self.position_x + d2, self.position_y - d2]]
-                d2 += 1
+            selected_list += bishop()
+
+        elif isinstance(self.piece, Rook):
+            selected_list = [[i, self.position_y] for i in range(8)] + [[self.position_x, i] for i in range(8)]
+
+        elif isinstance(self.piece, Bishop):
+            selected_list = bishop()
+
         return selected_list
 
 
