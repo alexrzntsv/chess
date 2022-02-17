@@ -402,14 +402,20 @@ class Life:
                 elif event.type == MOUSEBUTTONDOWN:
                     x_pos = (pygame.mouse.get_pos()[0] - 70) // self.cell_size
                     y_pos = (pygame.mouse.get_pos()[1] - 70) // self.cell_size
-                    if press_key[0] == x_pos and press_key[1] == y_pos:
-                        self.cell_table.list[x_pos][y_pos].state = 'Unselected'
-                        press_key = (None, None)
+                    if 0 <= x_pos <= 7 and 0 <= y_pos <= 7:
+                        if press_key[0] == x_pos and press_key[1] == y_pos:
+
+                            self.cell_table.list[x_pos][y_pos].state = 'Unselected'
+                            press_key = (None, None)
+                        else:
+                            if press_key != (None, None):
+                                self.cell_table.list[press_key[0]][press_key[1]].state = 'Unselected'
+                            self.cell_table.list[x_pos][y_pos].state = 'Selected'
+                            press_key = (x_pos, y_pos)
                     else:
                         if press_key != (None, None):
                             self.cell_table.list[press_key[0]][press_key[1]].state = 'Unselected'
-                        self.cell_table.list[x_pos][y_pos].state = 'Selected'
-                        press_key = (x_pos, y_pos)
+                        press_key = (None, None)
 
             self.all_sprites.update()
             self.make_board()
