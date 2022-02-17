@@ -393,5 +393,5 @@ class Life:
         pygame.quit()
 
 if __name__ == '__main__':
-    game = Life(500, 500, 40, 5)
+    game = Life(650, 650, 60, 5)
     game.run_game()
