@@ -15,9 +15,9 @@ class Chess():
         self.image = pygame.image.load(os.path.join(img_folder, self.image_name)).convert()
         self.image = pygame.transform.scale(self.image, (game.cell_size, game.cell_size))
         if self.color_type == "black":
-            self.image.set_colorkey((0, 0, 0))
+            self.image.set_colorkey((255, 255, 255))
         elif self.color_type == "white":
-            self.image.set_colorkey((0, 0, 0))
+            self.image.set_colorkey((128, 128, 128))
         else:
             raise ValueError("No color")
         self.rect = self.image.get_rect()
@@ -52,7 +52,7 @@ class Knight(pygame.sprite.Sprite):
         if self.color_type == "black":
             self.image_name = "knight_b.png"
         elif self.color_type == "white":
-            self.image_name = "khight_w.png"
+            self.image_name = "knight_w.png"
         else:
             raise ValueError("No color")
         self.rect = Chess.set_sprite(self, self.image_name, self.color_type)
@@ -235,8 +235,31 @@ class CellList:
                 if cell_list[row][column].state == 'Selected' and cell_list[row][column].piece != 'None':
                     selected_list = cell_list[row][column].show_variants(cell_list)
                     for i in selected_list:
-                        pygame.draw.rect(self.surface, pygame.Color('green'), (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
-                                                                               self.cell_size - 1, self.cell_size - 1))
+                        if (i[0] + i[1]) % 2 == 0:
+                            pygame.draw.rect(self.surface, (161, 207, 157),
+                                             (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
+                                              self.cell_size - 1, self.cell_size - 1))
+                        else:
+                            pygame.draw.rect(self.surface, (0, 128, 0),
+                                             (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
+                                              self.cell_size - 1, self.cell_size - 1))
+
+    def undraw(self):
+        cell_list = self.list
+        for row in range(len(cell_list)):
+            for column in range(len(cell_list[row])):
+                if cell_list[row][column].state == 'Unselected' and cell_list[row][column].piece != 'None':
+                    unselected_list = cell_list[row][column].show_variants(cell_list)
+                    for i in unselected_list:
+                        if (i[0] + i[1]) % 2 == 0:
+                            pygame.draw.rect(self.surface, (207, 177, 157),
+                                             (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
+                                              self.cell_size - 1, self.cell_size - 1))
+                        else:
+                            pygame.draw.rect(self.surface, (128, 0, 0),
+                                             (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
+                                              self.cell_size - 1, self.cell_size - 1))
+                    cell_list[row][column].state = None
 
 class Life:
     def __init__(self, width=200, height=400, cell_size=20, fps=5):
@@ -369,6 +392,7 @@ class Life:
         self.all_sprites = pygame.sprite.Group()
         pygame.display.set_caption('Chess')
         self.screen.fill(pygame.Color('white'))
+        press_key = (None, None)
         game = True
         while game:
             self.make_units()
@@ -378,12 +402,20 @@ class Life:
                 elif event.type == MOUSEBUTTONDOWN:
                     x_pos = (pygame.mouse.get_pos()[0] - 70) // self.cell_size
                     y_pos = (pygame.mouse.get_pos()[1] - 70) // self.cell_size
-
-                    self.cell_table.list[x_pos][y_pos].state = 'Selected'
+                    if press_key[0] == x_pos and press_key[1] == y_pos:
+                        self.cell_table.list[x_pos][y_pos].state = 'Unselected'
+                        press_key = (None, None)
+                    else:
+                        if press_key != (None, None):
+                            self.cell_table.list[press_key[0]][press_key[1]].state = 'Unselected'
+                        self.cell_table.list[x_pos][y_pos].state = 'Selected'
+                        press_key = (x_pos, y_pos)
 
             self.all_sprites.update()
             self.make_board()
+            self.cell_table.undraw()
             self.cell_table.draw()
+
             self.screen.blit(self.surface1, (0, 0))
             #self.make_units()
             self.all_sprites.draw(self.screen)
