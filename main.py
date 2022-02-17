@@ -184,6 +184,9 @@ class Cell:
         elif isinstance(self.piece, Bishop):
             selected_list = bishop()
 
+        #проверка выхода подсвеченных клеток за границы поля
+        selected_list[:] = [i for i in selected_list if all(item in list(range(0, 8)) for item in i)]
+
         return selected_list
 
 
@@ -222,7 +225,7 @@ class CellList:
         cell_list = self.list
         for row in range(len(cell_list)):
             for column in range(len(cell_list[row])):
-                if cell_list[row][column].state == 'Selected':
+                if cell_list[row][column].state == 'Selected' and cell_list[row][column].piece != 'None':
                     selected_list = cell_list[row][column].show_variants()
                     for i in selected_list:
                         pygame.draw.rect(self.surface, pygame.Color('green'), (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
