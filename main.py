@@ -12,14 +12,8 @@ class Chess():
     def set_sprite(self, image_name, color):
         self.color_type = color
         self.image_name = image_name
-        self.image = pygame.image.load(os.path.join(img_folder, self.image_name)).convert()
+        self.image = pygame.image.load(os.path.join(img_folder, self.image_name)).convert_alpha()
         self.image = pygame.transform.scale(self.image, (game.cell_size, game.cell_size))
-        if self.color_type == "black":
-            self.image.set_colorkey((255, 255, 255))
-        elif self.color_type == "white":
-            self.image.set_colorkey((128, 128, 128))
-        else:
-            raise ValueError("No color")
         self.rect = self.image.get_rect()
         return self.rect
 
@@ -235,12 +229,7 @@ class CellList:
                 if cell_list[row][column].state == 'Selected' and cell_list[row][column].piece != 'None':
                     selected_list = cell_list[row][column].show_variants(cell_list)
                     for i in selected_list:
-                        if (i[0] + i[1]) % 2 == 0:
-                            pygame.draw.rect(self.surface, (161, 207, 157),
-                                             (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
-                                              self.cell_size - 1, self.cell_size - 1))
-                        else:
-                            pygame.draw.rect(self.surface, (0, 128, 0),
+                        pygame.draw.rect(self.surface, (129, 213, 135) if (i[0] + i[1]) % 2 == 0 else (24, 63, 33),
                                              (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
                                               self.cell_size - 1, self.cell_size - 1))
 
@@ -251,12 +240,7 @@ class CellList:
                 if cell_list[row][column].state == 'Unselected' and cell_list[row][column].piece != 'None':
                     unselected_list = cell_list[row][column].show_variants(cell_list)
                     for i in unselected_list:
-                        if (i[0] + i[1]) % 2 == 0:
-                            pygame.draw.rect(self.surface, (207, 177, 157),
-                                             (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
-                                              self.cell_size - 1, self.cell_size - 1))
-                        else:
-                            pygame.draw.rect(self.surface, (128, 0, 0),
+                        pygame.draw.rect(self.surface, (192, 192, 192) if (i[0] + i[1]) % 2 == 0 else (21, 34, 45),
                                              (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
                                               self.cell_size - 1, self.cell_size - 1))
                     cell_list[row][column].state = None
@@ -280,6 +264,14 @@ class Life:
         self.cell_table = CellList(self.surface1, self.cell_size, 8, 8)
         self.surface2 = pygame.display.set_mode(self.screen_size)
 
+    def make_lines(self):
+
+        for x in range(70, 71 + self.cell_size * 8, self.cell_size):
+            pygame.draw.line(self.screen, pygame.Color('black'), (x, 70), (x, 70 + self.cell_size * 8), 4)
+
+        for y in range(70, 71 + self.cell_size * 8, self.cell_size):
+            pygame.draw.line(self.screen, pygame.Color('black'), (70, y), (70 + self.cell_size * 8, y), 4)
+
     def make_board(self):
         numbers_list = ['8', '7', '6', '5', '4', '3', '2', '1']
         letters_list = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
@@ -288,34 +280,33 @@ class Life:
         for x in range(8):
             for y in range(8):
                 #self.cell_list.append(Cell(x, y))
-                pygame.draw.rect(self.screen, (207, 177, 157) if (x+y) % 2 == 0 else (128, 0, 0),
+                pygame.draw.rect(self.screen, (192, 192, 192) if (x+y) % 2 == 0 else (21, 34, 45),
                                 (70 + self.cell_size * x, 70 + self.cell_size * y, self.cell_size, self.cell_size))
             #self.cell_table.append(self.cell_list)
             #self.cell_list=[]
-        font = pygame.font.Font(None, 30)
+        pygame.font.init()
+        font = pygame.font.Font('GorgeousPixel.ttf', 30)
         counter_x = 0
         for x in range(70, 71 + self.cell_size * 8, self.cell_size):
-            pygame.draw.line(self.screen, pygame.Color('black'), (x, 70), (x, 70 + self.cell_size * 8))
             try:
                 text_1 = font.render(letters_list[counter_x], True, (0, 0, 0))
                 text_2 = pygame.transform.flip(text_1, True, True)
             except IndexError:
                 break
-            text_1_pos = (x + self.cell_size // 3, 80 + self.cell_size * 8)
-            text_2_pos = (x + self.cell_size // 3, 70 - self.cell_size // 1.5 )
+            text_1_pos = (x + self.cell_size // 2.55, 79 + self.cell_size * 8)
+            text_2_pos = (x + self.cell_size // 2.55, 70 - self.cell_size // 1.6 )
             self.screen.blit(text_1, text_1_pos)
             self.screen.blit(text_2, text_2_pos)
             counter_x += 1
         counter_y = 0
         for y in range(70, 71 + self.cell_size * 8, self.cell_size):
-            pygame.draw.line(self.screen, pygame.Color('black'), (70, y), (70 + self.cell_size * 8, y))
             try:
                 text_1 = font.render(numbers_list[counter_y], True, (0, 0, 0))
                 text_2 = pygame.transform.flip(text_1, True, True)
             except IndexError:
                 break
-            text_1_pos = (70 - self.cell_size // 1.5 , y + self.cell_size // 3)
-            text_2_pos = (80 + self.cell_size * 8, y + self.cell_size // 3)
+            text_1_pos = (70 - self.cell_size // 1.6 , y + self.cell_size // 3.7)
+            text_2_pos = (97 + self.cell_size * 8, y + self.cell_size // 3.7)
             self.screen.blit(text_1, text_1_pos)
             self.screen.blit(text_2, text_2_pos)
             counter_y += 1
@@ -391,7 +382,7 @@ class Life:
         #clock = pygame.time.Clock()
         self.all_sprites = pygame.sprite.Group()
         pygame.display.set_caption('Chess')
-        self.screen.fill(pygame.Color('white'))
+        self.screen.fill((121, 121, 121))
         press_key = (None, None)
         game = True
         while game:
@@ -421,15 +412,15 @@ class Life:
             self.make_board()
             self.cell_table.undraw()
             self.cell_table.draw()
-
             self.screen.blit(self.surface1, (0, 0))
             #self.make_units()
             self.all_sprites.draw(self.screen)
+            self.make_lines()
 
             pygame.display.flip()
             #clock.tick(self.fps)
         pygame.quit()
 
 if __name__ == '__main__':
-    game = Life(650, 650, 60, 5)
+    game = Life(700, 700, 70, 5)
     game.run_game()
