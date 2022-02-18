@@ -229,7 +229,7 @@ class CellList:
                 if cell_list[row][column].state == 'Selected' and cell_list[row][column].piece != 'None':
                     selected_list = cell_list[row][column].show_variants(cell_list)
                     for i in selected_list:
-                        pygame.draw.rect(self.surface, (129, 213, 135) if (i[0] + i[1]) % 2 == 0 else (24, 63, 33),
+                        pygame.draw.rect(self.surface, (161, 211, 134) if (i[0] + i[1]) % 2 == 0 else (24, 63, 33),
                                              (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
                                               self.cell_size - 1, self.cell_size - 1))
 
@@ -310,6 +310,46 @@ class Life:
             self.screen.blit(text_1, text_1_pos)
             self.screen.blit(text_2, text_2_pos)
             counter_y += 1
+
+        options = ['new_game.png', 'last_move.png']
+        for name in options:
+            option_img = pygame.image.load(os.path.join(img_folder, name)).convert_alpha()
+            option_img = pygame.transform.scale(option_img, (game.cell_size // 1.2, game.cell_size // 1.2))
+            option_rect = option_img.get_rect()
+            if name == 'new_game.png':
+                option_rect.topleft = (6, 8)
+            elif name == 'last_move.png':
+                option_rect.topleft = (self.width - 9 - game.cell_size // 1.2, 8)
+            self.screen.blit(option_img, option_rect)
+
+
+    def choose(self, color):
+        pygame.draw.rect(self.screen, (121, 121, 121),
+                         (self.width // 2 - 2 * self.cell_size + 1, self.height // 2 - 0.48 * self.cell_size - 5, self.cell_size * 4, self.cell_size * 2),)
+        pygame.draw.rect(self.screen, (0, 0, 0),
+                         (self.width // 2 - 2 * self.cell_size + 1, self.height // 2 - 0.48 * self.cell_size - 5,
+                          self.cell_size * 4, self.cell_size * 2), 4)
+        pygame.font.init()
+        font = pygame.font.Font('GorgeousPixel.ttf', 60)
+        text_choose = 'Choo' \
+                      'se:'
+        text_chose_f = font.render(text_choose, True, (0, 0, 0))
+        text_choose_pos = (self.width // 2 - self.cell_size * 1.5, self.height // 2 - self.cell_size * 0.5)
+        self.screen.blit(text_chose_f, text_choose_pos)
+
+        self.color = color
+        if self.color == 'black':
+            options = ['pawn_b.png', 'bishop_b.png', 'rook_b.png', 'knight_b.png']
+        else:
+            options = ['pawn_w.png', 'bishop_w.png', 'rook_w.png', 'knight_w.png']
+        i = 2
+        for name in options:
+            option_img = pygame.image.load(os.path.join(img_folder, name)).convert_alpha()
+            option_img = pygame.transform.scale(option_img, (self.cell_size, self.cell_size))
+            option_rect = option_img.get_rect()
+            option_rect.bottomleft = (self.width // 2 - i * self.cell_size, self.height // 2 + self.cell_size * 1.35)
+            self.screen.blit(option_img, option_rect)
+            i -= 1
 
     def make_units(self):
         for x in range(8):
@@ -416,7 +456,7 @@ class Life:
             #self.make_units()
             self.all_sprites.draw(self.screen)
             self.make_lines()
-
+            #self.choose('white')
             pygame.display.flip()
             #clock.tick(self.fps)
         pygame.quit()
