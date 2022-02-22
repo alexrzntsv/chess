@@ -139,18 +139,42 @@ class Cell:
             while self.position_x + d1 in lst and self.position_y + d1 in lst and current_list[self.position_x + d1][self.position_y + d1].piece == "None":
                 res += [[self.position_x + d1, self.position_y + d1]]
                 d1 += 1
+            else:
+                try:
+                    if current_list[self.position_x + d1][self.position_y + d1].piece.color_type != self.piece.color_type :
+                        res += [[self.position_x + d1, self.position_y + d1]]
+                except (IndexError, AttributeError):
+                    pass
             d2 = 1
             while self.position_x + d2 in lst and self.position_y - d2 in lst and current_list[self.position_x + d2][self.position_y - d2].piece == "None":
                 res += [[self.position_x + d2, self.position_y - d2]]
                 d2 += 1
+            else:
+                try:
+                    if current_list[self.position_x + d2][self.position_y - d2].piece.color_type != self.piece.color_type:
+                        res += [[self.position_x + d2, self.position_y - d2]]
+                except (IndexError, AttributeError):
+                    pass
             d3 = 1
             while self.position_x - d3 in lst and self.position_y + d3 in lst and current_list[self.position_x - d3][self.position_y + d3].piece == "None":
                 res += [[self.position_x - d3, self.position_y + d3]]
                 d3 += 1
+            else:
+                try:
+                    if current_list[self.position_x - d3][self.position_y + d3].piece.color_type != self.piece.color_type:
+                        res += [[self.position_x - d3, self.position_y + d2]]
+                except (IndexError, AttributeError):
+                    pass
             d4 = 1
             while self.position_x - d4 in lst and self.position_y - d4 in lst and current_list[self.position_x - d4][self.position_y - d4].piece == "None":
                 res += [[self.position_x - d4, self.position_y - d4]]
                 d4 += 1
+            else:
+                try:
+                    if current_list[self.position_x - d4][self.position_y - d4].piece.color_type != self.piece.color_type:
+                        res += [[self.position_x - d4, self.position_y - d4]]
+                except (IndexError, AttributeError):
+                    pass
             return res
         def rook():
             lst = list(range(0, 8))
@@ -159,18 +183,42 @@ class Cell:
             while self.position_x + d1 in lst and current_list[self.position_x + d1][self.position_y].piece == "None":
                 res.append([self.position_x + d1, self.position_y])
                 d1 += 1
+            else:
+                try:
+                    if current_list[self.position_x + d1][self.position_y].piece.color_type != self.piece.color_type:
+                        res += [[self.position_x + d1, self.position_y]]
+                except (IndexError, AttributeError):
+                    pass
             d2 = 1
             while self.position_x - d2 in lst and current_list[self.position_x - d2][self.position_y].piece == "None":
                 res.append([self.position_x - d2, self.position_y])
                 d2 += 1
+            else:
+                try:
+                    if current_list[self.position_x - d2][self.position_y].piece.color_type != self.piece.color_type:
+                        res += [[self.position_x - d2, self.position_y]]
+                except (IndexError, AttributeError):
+                    pass
             d3 = 1
             while self.position_y + d3 in lst and current_list[self.position_x][self.position_y + d3].piece == "None":
                 res.append([self.position_x, self.position_y + d3])
                 d3 += 1
+            else:
+                try:
+                    if current_list[self.position_x][self.position_y + d3].piece.color_type != self.piece.color_type:
+                        res += [[self.position_x, self.position_y + d3]]
+                except (IndexError, AttributeError):
+                    pass
             d4 = 1
             while self.position_y - d4 and current_list[self.position_x][self.position_y - d4].piece == "None":
                 res.append([self.position_x, self.position_y - d4])
                 d4 += 1
+            else:
+                try:
+                    if current_list[self.position_x][self.position_y - d4].piece.color_type != self.piece.color_type:
+                        res += [[self.position_x, self.position_y - d4]]
+                except (IndexError, AttributeError):
+                    pass
             return res
 
         if isinstance(self.piece, Pawn):
