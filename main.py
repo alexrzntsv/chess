@@ -136,27 +136,53 @@ class Cell:
             lst = list(range(0, 8))
             res = []
             d1 = 1
-            while self.position_x + d1 in lst and self.position_y + d1 in lst:
+            while self.position_x + d1 in lst and self.position_y + d1 in lst and current_list[self.position_x + d1][self.position_y + d1].piece == "None":
                 res += [[self.position_x + d1, self.position_y + d1]]
                 d1 += 1
             d2 = 1
-            while self.position_x + d2 in lst and self.position_y - d2 in lst:
+            while self.position_x + d2 in lst and self.position_y - d2 in lst and current_list[self.position_x + d2][self.position_y - d2].piece == "None":
                 res += [[self.position_x + d2, self.position_y - d2]]
                 d2 += 1
             d3 = 1
-            while self.position_x - d3 in lst and self.position_y + d3 in lst:
+            while self.position_x - d3 in lst and self.position_y + d3 in lst and current_list[self.position_x - d3][self.position_y + d3].piece == "None":
                 res += [[self.position_x - d3, self.position_y + d3]]
                 d3 += 1
             d4 = 1
-            while self.position_x - d4 in lst and self.position_y - d4 in lst:
+            while self.position_x - d4 in lst and self.position_y - d4 in lst and current_list[self.position_x - d4][self.position_y - d4].piece == "None":
                 res += [[self.position_x - d4, self.position_y - d4]]
+                d4 += 1
+            return res
+        def rook():
+            lst = list(range(0, 8))
+            res = []
+            d1 = 1
+            while self.position_x + d1 in lst and current_list[self.position_x + d1][self.position_y].piece == "None":
+                res.append([self.position_x + d1, self.position_y])
+                d1 += 1
+            d2 = 1
+            while self.position_x - d2 in lst and current_list[self.position_x - d2][self.position_y].piece == "None":
+                res.append([self.position_x - d2, self.position_y])
+                d2 += 1
+            d3 = 1
+            while self.position_y + d3 in lst and current_list[self.position_x][self.position_y + d3].piece == "None":
+                res.append([self.position_x, self.position_y + d3])
+                d3 += 1
+            d4 = 1
+            while self.position_y - d4 and current_list[self.position_x][self.position_y - d4].piece == "None":
+                res.append([self.position_x, self.position_y - d4])
                 d4 += 1
             return res
 
         if isinstance(self.piece, Pawn):
-            selected_list = ([[self.position_x, self.position_y - 1],[self.position_x , self.position_y - 2]]
-                    if self.piece.color_type == 'white' else
-                    [[self.position_x, self.position_y + 1],[self.position_x, self.position_y + 2]])
+            if (self.position_y == 1 and self.piece.color_type == "black") or (self.position_y == 6 and self.piece.color_type == "white"):
+                selected_list = ([[self.position_x, self.position_y - 1],[self.position_x , self.position_y - 2]]
+                                 if self.piece.color_type == 'white' else
+                                 [[self.position_x, self.position_y + 1],[self.position_x, self.position_y + 2]])
+            else:
+                selected_list = ([[self.position_x, self.position_y - 1]]
+                                 if self.piece.color_type == 'white' else
+                                 [[self.position_x, self.position_y + 1]])
+
         elif isinstance(self.piece, Knight):
             selected_list = [[self.position_x + 2, self.position_y - 1], [self.position_x + 2, self.position_y + 1],
                     [self.position_x - 2, self.position_y - 1], [self.position_x - 2, self.position_y + 1],
@@ -169,11 +195,11 @@ class Cell:
                     [self.position_x + 1, self.position_y - 1], [self.position_x - 1, self.position_y + 1]]
 
         elif isinstance(self.piece, Queen):
-            selected_list = [[i, self.position_y] for i in range(8)] + [[self.position_x, i] for i in range(8)]
+            selected_list = rook()
             selected_list += bishop()
 
         elif isinstance(self.piece, Rook):
-            selected_list = [[i, self.position_y] for i in range(8)] + [[self.position_x, i] for i in range(8)]
+            selected_list = rook()
 
         elif isinstance(self.piece, Bishop):
             selected_list = bishop()
@@ -270,7 +296,7 @@ class CellList:
                                               self.cell_size - 1, self.cell_size - 1))
                     cell_list[row][column].state = None
     def undraw_now(self, x, y):
-        i=(x, y)
+        i = (x, y)
         pygame.draw.rect(self.surface, (192, 192, 192) if (i[0] + i[1]) % 2 == 0 else (21, 34, 45),
                          (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
                           self.cell_size - 1, self.cell_size - 1))
