@@ -95,6 +95,7 @@ class Rook(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.description = color + " " + "Rook"
         self.color_type = color
+
         if self.color_type == "black":
             self.image_name = "rook_b.png"
         elif self.color_type == "white":
@@ -104,12 +105,13 @@ class Rook(pygame.sprite.Sprite):
         self.rect = Chess.set_sprite(self, self.image_name, self.color_type)
 
 class Cell:
-    def __init__(self, position_x=0, position_y=0, piece="None", previous="None", state=None):
+    def __init__(self, position_x=0, position_y=0, piece="None", state=None, previous="None", state_piece=None):
         self.position_x = position_x
         self.position_y = position_y
         self.piece = piece
         self.previous = previous
         self.state = state
+        self.state_piece = state_piece
         if self.piece != "None":
             self.desribtion = (str(self.position_x) + " " + str(self.position_y) + " " + self.piece.description)
         else: self.desribtion = (str(self.position_x) + " " + str(self.position_y) + " " + self.piece)
@@ -119,8 +121,6 @@ class Cell:
                 70 + self.position_y * game.cell_size + game.cell_size//3)
     def update(self, new_piece):
         self.previous = self.piece
-        if self.piece != "None":
-            self.piece.kill()
         self.piece = new_piece
         Chess.load_unit(self, (self.position_x, self.position_y), self.piece.rect)
 
@@ -232,6 +232,31 @@ class CellList:
                         pygame.draw.rect(self.surface, (161, 211, 134) if (i[0] + i[1]) % 2 == 0 else (24, 63, 33),
                                              (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
                                               self.cell_size - 1, self.cell_size - 1))
+    def check_and_move(self, piece, now):
+        self.x_pr = piece[0]
+        self.y_pr = piece[1]
+        self.x_n = now[0]
+        self.y_n = now[1]
+        cell_list = self.list
+        self.move_not = True
+
+        for row in range(len(cell_list)):
+            for column in range(len(cell_list[row])):
+                if cell_list[row][column].state == 'Move' and cell_list[self.x_pr][self.y_pr].piece != 'None':
+                    selected_list = cell_list[self.x_pr][self.y_pr].show_variants(cell_list)
+                    for i in selected_list:
+                        if i[0] == self.x_n and i[1] == self.y_n:
+                            Chess.load_unit(self, (self.x_n, self.y_n), cell_list[self.x_pr][self.y_pr].piece.rect)
+                            cell_list[self.x_n][self.y_n] = Cell(self.x_n, self.y_n, cell_list[self.x_pr][self.y_pr].piece, 'Unselected')
+                            self.move_not = False
+                            return True
+
+                    if self.move_not:
+                        cell_list[self.x_pr][self.y_pr].state = 'Unselected'
+                        return False
+
+                if cell_list[row][column].state == 'Move' and cell_list[self.x_pr][self.y_pr].piece == 'None':
+                    return False
 
     def undraw(self):
         cell_list = self.list
@@ -244,6 +269,11 @@ class CellList:
                                              (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
                                               self.cell_size - 1, self.cell_size - 1))
                     cell_list[row][column].state = None
+    def undraw_now(self, x, y):
+        i=(x, y)
+        pygame.draw.rect(self.surface, (192, 192, 192) if (i[0] + i[1]) % 2 == 0 else (21, 34, 45),
+                         (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
+                          self.cell_size - 1, self.cell_size - 1))
 
 class Life:
     def __init__(self, width=200, height=400, cell_size=20, fps=5):
@@ -331,17 +361,16 @@ class Life:
                           self.cell_size * 4, self.cell_size * 2), 4)
         pygame.font.init()
         font = pygame.font.Font('GorgeousPixel.ttf', 60)
-        text_choose = 'Choo' \
-                      'se:'
+        text_choose = 'Choose:'
         text_chose_f = font.render(text_choose, True, (0, 0, 0))
         text_choose_pos = (self.width // 2 - self.cell_size * 1.5, self.height // 2 - self.cell_size * 0.5)
         self.screen.blit(text_chose_f, text_choose_pos)
 
         self.color = color
         if self.color == 'black':
-            options = ['pawn_b.png', 'bishop_b.png', 'rook_b.png', 'knight_b.png']
+            options = ['queen_b.png', 'bishop_b.png', 'rook_b.png', 'knight_b.png']
         else:
-            options = ['pawn_w.png', 'bishop_w.png', 'rook_w.png', 'knight_w.png']
+            options = ['queen_w.png', 'bishop_w.png', 'rook_w.png', 'knight_w.png']
         i = 2
         for name in options:
             option_img = pygame.image.load(os.path.join(img_folder, name)).convert_alpha()
@@ -425,24 +454,39 @@ class Life:
         self.screen.fill((121, 121, 121))
         press_key = (None, None)
         game = True
+        self.make_units()
         while game:
-            self.make_units()
+
             for event in pygame.event.get():
                 if event.type == QUIT:
                     game = False
                 elif event.type == MOUSEBUTTONDOWN:
                     x_pos = (pygame.mouse.get_pos()[0] - 70) // self.cell_size
                     y_pos = (pygame.mouse.get_pos()[1] - 70) // self.cell_size
+
                     if 0 <= x_pos <= 7 and 0 <= y_pos <= 7:
                         if press_key[0] == x_pos and press_key[1] == y_pos:
 
                             self.cell_table.list[x_pos][y_pos].state = 'Unselected'
                             press_key = (None, None)
                         else:
+
                             if press_key != (None, None):
-                                self.cell_table.list[press_key[0]][press_key[1]].state = 'Unselected'
-                            self.cell_table.list[x_pos][y_pos].state = 'Selected'
-                            press_key = (x_pos, y_pos)
+
+                                self.cell_table.list[press_key[0]][press_key[1]].state = 'Move'
+                                if (self.cell_table.check_and_move(press_key, (x_pos, y_pos))):
+                                    self.cell_table.list[press_key[0]][press_key[1]].state = 'Unselected'
+                                    self.cell_table.undraw()
+                                    self.cell_table.list[press_key[0]][press_key[1]] = Cell(press_key[0], press_key[1], 'None', 'Unselected')
+                                    self.cell_table.undraw_now(x_pos, y_pos)
+
+                                    press_key = (None, None)
+                                else:
+                                    self.cell_table.list[x_pos][y_pos].state = 'Selected'
+                                    press_key = (x_pos, y_pos)
+                            else:
+                                self.cell_table.list[x_pos][y_pos].state = 'Selected'
+                                press_key = (x_pos, y_pos)
                     else:
                         if press_key != (None, None):
                             self.cell_table.list[press_key[0]][press_key[1]].state = 'Unselected'
@@ -450,12 +494,15 @@ class Life:
 
             self.all_sprites.update()
             self.make_board()
-            self.cell_table.undraw()
+
             self.cell_table.draw()
+            self.cell_table.undraw()
             self.screen.blit(self.surface1, (0, 0))
+
             #self.make_units()
             self.all_sprites.draw(self.screen)
             self.make_lines()
+            #self.choose('black')
             #self.choose('white')
             pygame.display.flip()
             #clock.tick(self.fps)
