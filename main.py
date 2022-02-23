@@ -132,93 +132,36 @@ class Cell:
         else: print("Ошибка")
 
     def show_variants(self, current_list):
-        def bishop():
-            lst = list(range(0, 8))
-            res = []
+        def calc(res, x=0, y=0):
             d1 = 1
-            while self.position_x + d1 in lst and self.position_y + d1 in lst and current_list[self.position_x + d1][self.position_y + d1].piece == "None":
-                res += [[self.position_x + d1, self.position_y + d1]]
+            lst = list(range(0, 8))
+            while self.position_x + (d1*x) in lst and self.position_y + (d1*y) in lst and current_list[self.position_x + (d1*x)][
+                self.position_y + (d1*y)].piece == "None":
+                res += [[self.position_x + d1*x, self.position_y + (d1*y)]]
                 d1 += 1
             else:
                 try:
-                    if current_list[self.position_x + d1][self.position_y + d1].piece.color_type != self.piece.color_type :
-                        res += [[self.position_x + d1, self.position_y + d1]]
-                except (IndexError, AttributeError):
-                    pass
-            d2 = 1
-            while self.position_x + d2 in lst and self.position_y - d2 in lst and current_list[self.position_x + d2][self.position_y - d2].piece == "None":
-                res += [[self.position_x + d2, self.position_y - d2]]
-                d2 += 1
-            else:
-                try:
-                    if current_list[self.position_x + d2][self.position_y - d2].piece.color_type != self.piece.color_type:
-                        res += [[self.position_x + d2, self.position_y - d2]]
-                except (IndexError, AttributeError):
-                    pass
-            d3 = 1
-            while self.position_x - d3 in lst and self.position_y + d3 in lst and current_list[self.position_x - d3][self.position_y + d3].piece == "None":
-                res += [[self.position_x - d3, self.position_y + d3]]
-                d3 += 1
-            else:
-                try:
-                    if current_list[self.position_x - d3][self.position_y + d3].piece.color_type != self.piece.color_type:
-                        res += [[self.position_x - d3, self.position_y + d2]]
-                except (IndexError, AttributeError):
-                    pass
-            d4 = 1
-            while self.position_x - d4 in lst and self.position_y - d4 in lst and current_list[self.position_x - d4][self.position_y - d4].piece == "None":
-                res += [[self.position_x - d4, self.position_y - d4]]
-                d4 += 1
-            else:
-                try:
-                    if current_list[self.position_x - d4][self.position_y - d4].piece.color_type != self.piece.color_type:
-                        res += [[self.position_x - d4, self.position_y - d4]]
+                    if current_list[self.position_x + (d1*x)][
+                        self.position_y + (d1*y)].piece.color_type != self.piece.color_type:
+                        res += [[self.position_x + (d1*x), self.position_y + (d1*y)]]
                 except (IndexError, AttributeError):
                     pass
             return res
-        def rook():
-            lst = list(range(0, 8))
+
+        def bishop():
             res = []
-            d1 = 1
-            while self.position_x + d1 in lst and current_list[self.position_x + d1][self.position_y].piece == "None":
-                res.append([self.position_x + d1, self.position_y])
-                d1 += 1
-            else:
-                try:
-                    if current_list[self.position_x + d1][self.position_y].piece.color_type != self.piece.color_type:
-                        res += [[self.position_x + d1, self.position_y]]
-                except (IndexError, AttributeError):
-                    pass
-            d2 = 1
-            while self.position_x - d2 in lst and current_list[self.position_x - d2][self.position_y].piece == "None":
-                res.append([self.position_x - d2, self.position_y])
-                d2 += 1
-            else:
-                try:
-                    if current_list[self.position_x - d2][self.position_y].piece.color_type != self.piece.color_type:
-                        res += [[self.position_x - d2, self.position_y]]
-                except (IndexError, AttributeError):
-                    pass
-            d3 = 1
-            while self.position_y + d3 in lst and current_list[self.position_x][self.position_y + d3].piece == "None":
-                res.append([self.position_x, self.position_y + d3])
-                d3 += 1
-            else:
-                try:
-                    if current_list[self.position_x][self.position_y + d3].piece.color_type != self.piece.color_type:
-                        res += [[self.position_x, self.position_y + d3]]
-                except (IndexError, AttributeError):
-                    pass
-            d4 = 1
-            while self.position_y - d4 and current_list[self.position_x][self.position_y - d4].piece == "None":
-                res.append([self.position_x, self.position_y - d4])
-                d4 += 1
-            else:
-                try:
-                    if current_list[self.position_x][self.position_y - d4].piece.color_type != self.piece.color_type:
-                        res += [[self.position_x, self.position_y - d4]]
-                except (IndexError, AttributeError):
-                    pass
+            res = calc(res, x=1, y=1)
+            res = calc(res, x=1, y=-1)
+            res = calc(res, x=-1, y=1)
+            res = calc(res, x=-1, y=-1)
+            return res
+        def rook():
+            res = []
+            res = calc(res, x=1, y=0)
+            res = calc(res, x=-1, y=0)
+            res = calc(res, x=0, y=1)
+            res = calc(res, x=0, y=-1)
+
             return res
 
         if isinstance(self.piece, Pawn):
