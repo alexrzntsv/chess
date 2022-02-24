@@ -187,6 +187,15 @@ class Cell:
 
             return res
 
+        def pawn_attack(x,y):
+            try:
+                lst = ([[self.position_x + x, self.position_y + y]] if
+                       current_list[self.position_x + x][self.position_y + y].piece.color_type != self.piece.color_type else [])
+            except AttributeError:
+                lst = []
+            return lst
+
+
         if isinstance(self.piece, Pawn):
             if (self.position_y == 1 and self.piece.color_type == "black") or (
                     self.position_y == 6 and self.piece.color_type == "white"):
@@ -197,6 +206,17 @@ class Cell:
                 selected_list = ([[self.position_x, self.position_y - 1]]
                                  if self.piece.color_type == 'white' else
                                  [[self.position_x, self.position_y + 1]])
+
+            for i in reversed(selected_list):
+                if current_list[i[0]][i[1]].piece != "None":
+                    selected_list.remove(i)
+
+            if self.piece.color_type == "white":
+                selected_list += pawn_attack(1, -1)
+                selected_list += pawn_attack(-1, -1)
+            elif self.piece.color_type == "black":
+                selected_list += pawn_attack(1, 1)
+                selected_list += pawn_attack(-1, 1)
 
         elif isinstance(self.piece, Knight):
             selected_list = [[self.position_x + 2, self.position_y - 1], [self.position_x + 2, self.position_y + 1],
