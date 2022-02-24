@@ -541,6 +541,7 @@ class Life:
                         Chess.load_unit(self, (x, y), king.rect)
                         self.all_sprites.add(king)
 
+
     # запуск иггры
     def run_game(self):
         pygame.init()
@@ -554,6 +555,7 @@ class Life:
         self.number_of_moves = 0
         self.make_units()
         mouse_click = True
+        turn = "white"
         while game:
             # обработка нажатий мышкой в игре
             for event in pygame.event.get():
@@ -604,12 +606,15 @@ class Life:
 
                                         press_key = (None, None)
                                         self.number_of_moves += 1
+                                        # !!!!!!!!!!!!!!!!!!!!turn = ("white" if turn =="black" else "black")
                                     else:
+                                        #!!!!!!!!!!!!!!!if self.cell_table.list[x_pos][y_pos].piece.color_type == turn:
                                         self.cell_table.list[x_pos][y_pos].state = 'Selected'
                                         press_key = (x_pos, y_pos)
                                 else:
-                                    self.cell_table.list[x_pos][y_pos].state = 'Selected'
-                                    press_key = (x_pos, y_pos)
+                                    #!!!!!!!!!!!!!!!!!if self.cell_table.list[x_pos][y_pos].piece.color_type == turn: 
+                                        self.cell_table.list[x_pos][y_pos].state = 'Selected'
+                                        press_key = (x_pos, y_pos)
                         # нажатия за границы поля
                         else:
                             if press_key != (None, None):
