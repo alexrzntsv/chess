@@ -346,12 +346,14 @@ class Life:
         for y in range(70, 71 + self.cell_size * 8, self.cell_size):
             pygame.draw.line(self.screen, pygame.Color('black'), (70, y), (70 + self.cell_size * 8, y), 4)
 
+
     # функция создания клеток доски
-    def make_board(self):
+    def make_board(self, number_of_moves):
         numbers_list = ['8', '7', '6', '5', '4', '3', '2', '1']
         letters_list = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
         # self.cell_table = []
         # self.cell_list = []
+        self.number_of_moves = number_of_moves
         for x in range(8):
             for y in range(8):
                 # self.cell_list.append(Cell(x, y))
@@ -397,6 +399,23 @@ class Life:
             elif name == 'last_move.png':
                 option_rect.topleft = (self.width - 9 - game.cell_size // 1.2, 8)
             self.screen.blit(option_img, option_rect)
+        #обновление количества ходов
+        number_txt = str(self.number_of_moves)
+        text_number = font.render(number_txt, True, (255, 255, 255))
+        if self.number_of_moves < 10:
+            text_number_pos = (70 - self.cell_size // 1.6, 79 + self.cell_size * 8)
+        elif 10 <= self.number_of_moves < 100:
+            text_number_pos = (70 - self.cell_size // 1.47, 79 + self.cell_size * 8)
+        elif self.number_of_moves >= 100:
+            text_number_pos = (70 - self.cell_size // 1.25, 79 + self.cell_size * 8)
+        pygame.draw.rect(self.screen, (121, 121, 121),
+                         (70 - self.cell_size // 1.6,
+                          79 + self.cell_size * 8, self.cell_size,
+                          self.cell_size), )
+        self.screen.blit(text_number, text_number_pos)
+
+
+
 
     # функция проверки пешки на краю доски
     def choose(self):
@@ -512,6 +531,7 @@ class Life:
         press_key = (None, None)
         game = True
         pawn_choose = False
+        self.number_of_moves = 0
         self.make_units()
         mouse_click = True
         while game:
@@ -563,6 +583,7 @@ class Life:
                                         self.cell_table.undraw_now(x_pos, y_pos)
 
                                         press_key = (None, None)
+                                        self.number_of_moves += 1
                                     else:
                                         self.cell_table.list[x_pos][y_pos].state = 'Selected'
                                         press_key = (x_pos, y_pos)
@@ -582,7 +603,7 @@ class Life:
                 if self.choose():
                     pass
                 else:
-                    self.make_board()
+                    self.make_board(self.number_of_moves)
                     self.cell_table.draw()
                     self.screen.blit(self.surface1, (0, 0))
                     self.all_sprites.draw(self.screen)
