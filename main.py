@@ -513,12 +513,14 @@ class Life:
         game = True
         pawn_choose = False
         self.make_units()
+        mouse_click = True
         while game:
             # обработка нажатий мышкой в игре
             for event in pygame.event.get():
                 if event.type == QUIT:
                     game = False
                 elif event.type == MOUSEBUTTONDOWN:
+                    mouse_click = True
                     x_pos = (pygame.mouse.get_pos()[0] - 70) // self.cell_size
                     y_pos = (pygame.mouse.get_pos()[1] - 70) // self.cell_size
 
@@ -576,17 +578,19 @@ class Life:
             # self.all_sprites.update()
 
             # проверка на пешку в последнем ряду
-            if self.choose():
-                pass
-            else:
-                self.make_board()
-                self.cell_table.draw()
-                self.screen.blit(self.surface1, (0, 0))
-                self.all_sprites.draw(self.screen)
-                self.make_lines()
-            # self.choose('black')
-            # self.choose('white')
-            pygame.display.flip()
+            if mouse_click:
+                if self.choose():
+                    pass
+                else:
+                    self.make_board()
+                    self.cell_table.draw()
+                    self.screen.blit(self.surface1, (0, 0))
+                    self.all_sprites.draw(self.screen)
+                    self.make_lines()
+                # self.choose('black')
+                # self.choose('white')
+                pygame.display.flip()
+                mouse_click = False
             # clock.tick(self.fps)
         pygame.quit()
 
