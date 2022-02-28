@@ -46,6 +46,7 @@ class Pawn(pygame.sprite.Sprite):
         else:
             raise ValueError("No color")
         self.rect = Chess.set_sprite(self, self.image_name, self.color_type)
+        self.previous_move = None
 
 
 class Knight(pygame.sprite.Sprite):
@@ -193,6 +194,12 @@ class Cell:
                        current_list[self.position_x + x][self.position_y + y].piece.color_type != self.piece.color_type else [])
             except AttributeError:
                 lst = []
+            # Проверка на взятие на проходе
+            if type(current_list[self.position_x + x][self.position_y].piece) == Pawn and \
+                    current_list[self.position_x + x][self.position_y].piece.color_type != self.piece.color_type and \
+                    current_list[self.position_x + x][self.position_y].piece.previous_move == 2:
+                lst += [[self.position_x + x, self.position_y + y]]
+
             return lst
 
 
@@ -217,6 +224,7 @@ class Cell:
             elif self.piece.color_type == "black":
                 selected_list += pawn_attack(1, 1)
                 selected_list += pawn_attack(-1, 1)
+
 
         elif isinstance(self.piece, Knight):
             selected_list = [[self.position_x + 2, self.position_y - 1], [self.position_x + 2, self.position_y + 1],
@@ -311,13 +319,22 @@ class CellList:
                             # уничтожение атакованной фигуры
                             if cell_list[self.x_n][self.y_n].piece != 'None':
                                 cell_list[self.x_n][self.y_n].piece.kill()
+                            # взятие на проходе
+                            if type(cell_list[self.x_pr][self.y_pr].piece) == Pawn and \
+                                    cell_list[self.x_n][self.y_n].piece == 'None' and \
+                                    (self.x_n != self.x_pr):
+                                cell_list[self.x_n][self.y_pr].piece.kill()
 
                             Chess.load_unit(self, (self.x_n, self.y_n), cell_list[self.x_pr][self.y_pr].piece.rect)
                             cell_list[self.x_n][self.y_n] = Cell(self.x_n, self.y_n,
                                                                  cell_list[self.x_pr][self.y_pr].piece, 'Unselected')
                             self.move_not = False
-                            if type(cell_list[self.x_n][self.y_n].piece == Pawn) and (self.y_n == 0 or self.y_n == 7):
-                                cell_list[self.x_n][self.y_n].piece.ch = (self.x_n, self.y_n)
+                            if type(cell_list[self.x_n][self.y_n].piece == Pawn):
+                                #Запоминание на сколько клеток сделала пешка ход (для взятия на проходе)
+                                self.list[self.x_n][self.y_n].piece.previous_move = abs(self.y_n - self.y_pr)
+                                if (self.y_n == 0 or self.y_n == 7):
+                                    cell_list[self.x_n][self.y_n].piece.ch = (self.x_n, self.y_n)
+
                             return True
                     # если ход не возможен, убирается выделение клеток
                     if self.move_not:
@@ -612,7 +629,7 @@ class Life:
                                         self.cell_table.list[x_pos][y_pos].state = 'Selected'
                                         press_key = (x_pos, y_pos)
                                 else:
-                                    #!!!!!!!!!!!!!!!!!if self.cell_table.list[x_pos][y_pos].piece.color_type == turn: 
+                                    #!!!!!!!!!!!!!!!!!if self.cell_table.list[x_pos][y_pos].piece.color_type == turn:
                                         self.cell_table.list[x_pos][y_pos].state = 'Selected'
                                         press_key = (x_pos, y_pos)
                         # нажатия за границы поля
