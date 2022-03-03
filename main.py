@@ -287,13 +287,16 @@ class CellList:
         cell_list = self.list
         for row in range(len(cell_list)):
             for column in range(len(cell_list[row])):
-
                 if cell_list[row][column].state == 'Selected' and cell_list[row][column].piece != 'None':
                     selected_list = cell_list[row][column].show_variants(cell_list)
                     for i in selected_list:
-                        pygame.draw.rect(self.surface, (161, 211, 134) if (i[0] + i[1]) % 2 == 0 else (24, 63, 33),
-                                         (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
-                                          self.cell_size - 1, self.cell_size - 1))
+                        cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
+                        d = self.chess_check(cell_list)
+                        cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
+                        if not(d):
+                            pygame.draw.rect(self.surface, (161, 211, 134) if (i[0] + i[1]) % 2 == 0 else (24, 63, 33),
+                                             (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
+                                              self.cell_size - 1, self.cell_size - 1))
                 if cell_list[row][column].state == 'Unselected' and cell_list[row][column].piece != 'None':
                     unselected_list = cell_list[row][column].show_variants(cell_list)
                     for i in unselected_list:
@@ -305,19 +308,21 @@ class CellList:
                     cell_list[row][column].state = None
 
     #функция проверки шаха
-    def chess_check(self):
+    def chess_check(self, cell_list, draw=False):
         W = False
-        cell_list = self.list
+        #cell_list = self.list
         for row in range(len(cell_list)):
             for column in range(len(cell_list[row])):
                 if cell_list[row][column].piece != 'None':
                     selected_list = cell_list[row][column].show_variants(cell_list)
                     for i in selected_list:
                         if type(cell_list[i[0]][i[1]].piece) == King:
-                            cell_list[i[0]][i[1]].state_check = "Check"
-                            cell_list[row][column].state_check = "Check"
-                            self.check = cell_list[i[0]][i[1]].piece.color_type
+                            if draw:
+                                cell_list[i[0]][i[1]].state_check = "Check"
+                                cell_list[row][column].state_check = "Check"
+                                self.check = cell_list[i[0]][i[1]].piece.color_type
                             W = True
+        #print(W)
         return W
 
     # функция закрашивания клеток в случае шаха
@@ -352,6 +357,13 @@ class CellList:
             for column in range(len(cell_list[row])):
                 if cell_list[row][column].state == 'Move' and cell_list[self.x_pr][self.y_pr].piece != 'None':
                     selected_list = cell_list[self.x_pr][self.y_pr].show_variants(cell_list)
+                    for i in selected_list[:]:
+                        cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
+                        d = self.chess_check(cell_list)
+                        cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
+                        if d:
+                            selected_list.remove(i)
+
                     for i in selected_list:
                         # если ход возможен, фигура ходит
                         if i[0] == self.x_n and i[1] == self.y_n:
@@ -696,7 +708,7 @@ class Life:
                 else:
                     self.make_board(self.number_of_moves)
                     self.cell_table.draw()
-                    self.cell_table.chess_check()
+                    self.cell_table.chess_check(self.cell_table.list, draw=True)
                     self.cell_table.draw_check()
                     self.screen.blit(self.surface1, (0, 0))
                     self.all_sprites.draw(self.screen)
