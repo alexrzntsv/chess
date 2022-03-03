@@ -297,6 +297,8 @@ class CellList:
                             pygame.draw.rect(self.surface, (161, 211, 134) if (i[0] + i[1]) % 2 == 0 else (24, 63, 33),
                                              (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
                                               self.cell_size - 1, self.cell_size - 1))
+                        else:
+                            cell_list[i[0]][i[1]].state = None
                 if cell_list[row][column].state == 'Unselected' and cell_list[row][column].piece != 'None':
                     unselected_list = cell_list[row][column].show_variants(cell_list)
                     for i in unselected_list:
