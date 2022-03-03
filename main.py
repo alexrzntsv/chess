@@ -122,12 +122,13 @@ class Rook(pygame.sprite.Sprite):
 
 # класс отдельных ячеек с текцщим состоянием и хранением в памяти двух фигур (текущей и предыдущей)
 class Cell:
-    def __init__(self, position_x=0, position_y=0, piece="None", state=None, previous="None", state_piece=None):
+    def __init__(self, position_x=0, position_y=0, piece="None", state=None, previous="None", state_piece=None, state_check=None):
         self.position_x = position_x
         self.position_y = position_y
         self.piece = piece
         self.previous = previous
         self.state = state
+        self.state_check = state_check
         self.state_piece = state_piece
         # if self.piece != "None":
         # self.desribtion = (str(self.position_x) + " " + str(self.position_y) + " " + self.piece.description)
@@ -192,14 +193,16 @@ class Cell:
             try:
                 lst = ([[self.position_x + x, self.position_y + y]] if
                        current_list[self.position_x + x][self.position_y + y].piece.color_type != self.piece.color_type else [])
-            except AttributeError:
+            except Exception:
                 lst = []
             # Проверка на взятие на проходе
-            if type(current_list[self.position_x + x][self.position_y].piece) == Pawn and \
-                    current_list[self.position_x + x][self.position_y].piece.color_type != self.piece.color_type and \
-                    current_list[self.position_x + x][self.position_y].piece.previous_move == 2:
-                lst += [[self.position_x + x, self.position_y + y]]
-
+            try:
+                if type(current_list[self.position_x + x][self.position_y].piece) == Pawn and \
+                        current_list[self.position_x + x][self.position_y].piece.color_type != self.piece.color_type and \
+                        current_list[self.position_x + x][self.position_y].piece.previous_move == 2:
+                    lst += [[self.position_x + x, self.position_y + y]]
+            except Exception:
+                pass
             return lst
 
 
@@ -272,6 +275,7 @@ class CellList:
         self.nrows = nrows
         self.ncolumns = ncolumns
         self.list = self.make()
+        self.check = None
 
     def make(self):
         cell_list = [[Cell(column * self.cell_size + 70, row * self.cell_size + 70)
@@ -283,6 +287,7 @@ class CellList:
         cell_list = self.list
         for row in range(len(cell_list)):
             for column in range(len(cell_list[row])):
+
                 if cell_list[row][column].state == 'Selected' and cell_list[row][column].piece != 'None':
                     selected_list = cell_list[row][column].show_variants(cell_list)
                     for i in selected_list:
@@ -298,6 +303,40 @@ class CellList:
                     cell_list[row][column].state = None
                 if cell_list[row][column].state == 'Unselected' and cell_list[row][column].piece == 'None':
                     cell_list[row][column].state = None
+
+    #функция проверки шаха
+    def chess_check(self):
+        W = False
+        cell_list = self.list
+        for row in range(len(cell_list)):
+            for column in range(len(cell_list[row])):
+                if cell_list[row][column].piece != 'None':
+                    selected_list = cell_list[row][column].show_variants(cell_list)
+                    for i in selected_list:
+                        if type(cell_list[i[0]][i[1]].piece) == King:
+                            cell_list[i[0]][i[1]].state_check = "Check"
+                            cell_list[row][column].state_check = "Check"
+                            self.check = cell_list[i[0]][i[1]].piece.color_type
+                            W = True
+        return W
+
+    # функция закрашивания клеток в случае шаха
+    def draw_check(self):
+        cell_list = self.list
+        for row in range(len(cell_list)):
+            for column in range(len(cell_list[row])):
+                if cell_list[row][column].state_check == 'Delete':
+                    pygame.draw.rect(self.surface, (192, 192, 192) if (row + column) % 2 == 0 else (21, 34, 45),
+                                     (row *
+                                      self.cell_size + 71, column * self.cell_size + 71,
+                                      self.cell_size - 1, self.cell_size - 1))
+                    cell_list[row][column].state_check = None
+
+                if cell_list[row][column].state_check == 'Check':
+                    pygame.draw.rect(self.surface, (250, 158, 124) if (row + column) % 2 == 0 else (102, 21, 23),
+                                     (row * self.cell_size + 71, column * self.cell_size + 71,
+                                      self.cell_size - 1, self.cell_size - 1))
+                    cell_list[row][column].state_check = 'Delete'
 
     # функция проверки возможности хода и самого хода
     def check_and_move(self, piece, now):
@@ -316,6 +355,7 @@ class CellList:
                     for i in selected_list:
                         # если ход возможен, фигура ходит
                         if i[0] == self.x_n and i[1] == self.y_n:
+
                             # уничтожение атакованной фигуры
                             if cell_list[self.x_n][self.y_n].piece != 'None':
                                 cell_list[self.x_n][self.y_n].piece.kill()
@@ -324,6 +364,7 @@ class CellList:
                                     cell_list[self.x_n][self.y_n].piece == 'None' and \
                                     (self.x_n != self.x_pr):
                                 cell_list[self.x_n][self.y_pr].piece.kill()
+                                cell_list[self.x_n][self.y_pr] = Cell(self.x_n, self.y_pr, 'None', 'Unselected')
 
                             Chess.load_unit(self, (self.x_n, self.y_n), cell_list[self.x_pr][self.y_pr].piece.rect)
                             cell_list[self.x_n][self.y_n] = Cell(self.x_n, self.y_n,
@@ -608,9 +649,12 @@ class Life:
 
                                 self.cell_table.list[x_pos][y_pos].state = 'Unselected'
                                 press_key = (None, None)
+
                             else:
 
                                 if press_key != (None, None):
+
+                                    self.cell_table.undraw_now(press_key[0], press_key[1])
 
                                     self.cell_table.list[press_key[0]][press_key[1]].state = 'Move'
                                     if (self.cell_table.check_and_move(press_key, (x_pos, y_pos))):
@@ -619,6 +663,8 @@ class Life:
                                         self.cell_table.list[press_key[0]][press_key[1]] = Cell(press_key[0],
                                                                                                 press_key[1], 'None',
                                                                                                 'Unselected')
+
+
                                         self.cell_table.undraw_now(x_pos, y_pos)
 
                                         press_key = (None, None)
@@ -628,10 +674,13 @@ class Life:
                                         #!!!!!!!!!!!!!!!if self.cell_table.list[x_pos][y_pos].piece.color_type == turn:
                                         self.cell_table.list[x_pos][y_pos].state = 'Selected'
                                         press_key = (x_pos, y_pos)
+
+
                                 else:
                                     #!!!!!!!!!!!!!!!!!if self.cell_table.list[x_pos][y_pos].piece.color_type == turn:
                                         self.cell_table.list[x_pos][y_pos].state = 'Selected'
                                         press_key = (x_pos, y_pos)
+
                         # нажатия за границы поля
                         else:
                             if press_key != (None, None):
@@ -647,8 +696,11 @@ class Life:
                 else:
                     self.make_board(self.number_of_moves)
                     self.cell_table.draw()
+                    self.cell_table.chess_check()
+                    self.cell_table.draw_check()
                     self.screen.blit(self.surface1, (0, 0))
                     self.all_sprites.draw(self.screen)
+
                     self.make_lines()
                 # self.choose('black')
                 # self.choose('white')
