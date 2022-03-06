@@ -686,7 +686,10 @@ class Life:
                                         # !!!!!!!!!!!!!!!!!!!!turn = ("white" if turn =="black" else "black")
                                     else:
                                         #!!!!!!!!!!!!!!!if self.cell_table.list[x_pos][y_pos].piece.color_type == turn:
+                                        self.cell_table.list[press_key[0]][press_key[1]].state = 'Unselected'
+                                        self.cell_table.draw()
                                         self.cell_table.list[x_pos][y_pos].state = 'Selected'
+
                                         press_key = (x_pos, y_pos)
 
 
