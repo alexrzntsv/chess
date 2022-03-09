@@ -207,8 +207,10 @@ class Cell:
 
 
         if isinstance(self.piece, Pawn):
-            if (self.position_y == 1 and self.piece.color_type == "black") or (
-                    self.position_y == 6 and self.piece.color_type == "white"):
+            if (self.position_y == 1 and self.piece.color_type == "black" and
+                current_list[self.position_x][self.position_y + 1].piece == "None") or (
+                    self.position_y == 6 and self.piece.color_type == "white" and
+                    current_list[self.position_x][self.position_y - 1].piece == "None"):
                 selected_list = ([[self.position_x, self.position_y - 1], [self.position_x, self.position_y - 2]]
                                  if self.piece.color_type == 'white' else
                                  [[self.position_x, self.position_y + 1], [self.position_x, self.position_y + 2]])
