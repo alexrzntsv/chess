@@ -296,11 +296,11 @@ class CellList:
                         if cell_list[i[0]][i[1]].piece != "None":
                             new_cel = Cell()
                             cell_list[row][column], new_cel = new_cel, cell_list[row][column]
-                        d = self.chess_check(cell_list)
+                        d = self.chess_check(cell_list, get_color=True)
                         if cell_list[i[0]][i[1]].piece != "None":
                             cell_list[row][column], new_cel = new_cel, cell_list[row][column]
                         cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
-                        if not(d):
+                        if not(d[0]) and cell_list[row][column].piece.color_type != d[1]:
                             pygame.draw.rect(self.surface, (161, 211, 134) if (i[0] + i[1]) % 2 == 0 else (24, 63, 33),
                                              (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
                                               self.cell_size - 1, self.cell_size - 1))
@@ -317,7 +317,8 @@ class CellList:
                     cell_list[row][column].state = None
 
     #функция проверки шаха
-    def chess_check(self, cell_list, draw=False):
+    def chess_check(self, cell_list, draw=False, get_color=False):
+        color = None
         W = False
         #cell_list = self.list
         for row in range(len(cell_list)):
@@ -330,9 +331,13 @@ class CellList:
                                 cell_list[i[0]][i[1]].state_check = "Check"
                                 cell_list[row][column].state_check = "Check"
                                 self.check = cell_list[i[0]][i[1]].piece.color_type
+                            if get_color:
+                                color = cell_list[i[0]][i[1]].piece.color_type
                             W = True
-        #print(W)
-        return W
+        if get_color:
+            return (W, color)
+        else:
+            return W
 
     # функция закрашивания клеток в случае шаха
     def draw_check(self):
