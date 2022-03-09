@@ -291,7 +291,12 @@ class CellList:
                     selected_list = cell_list[row][column].show_variants(cell_list)
                     for i in selected_list:
                         cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
+                        if cell_list[i[0]][i[1]].piece != "None":
+                            new_cel = Cell()
+                            cell_list[row][column], new_cel = new_cel, cell_list[row][column]
                         d = self.chess_check(cell_list)
+                        if cell_list[i[0]][i[1]].piece != "None":
+                            cell_list[row][column], new_cel = new_cel, cell_list[row][column]
                         cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
                         if not(d):
                             pygame.draw.rect(self.surface, (161, 211, 134) if (i[0] + i[1]) % 2 == 0 else (24, 63, 33),
