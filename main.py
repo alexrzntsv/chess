@@ -1,4 +1,5 @@
 import pygame
+import sys
 import os
 from pygame.locals import *
 
@@ -48,6 +49,53 @@ class Pawn(pygame.sprite.Sprite):
         self.rect = Chess.set_sprite(self, self.image_name, self.color_type)
         self.previous_move = None
 
+class Pawn_2(pygame.sprite.Sprite):
+    def __init__(self, color, ch=None):
+        pygame.sprite.Sprite.__init__(self)
+        self.ch = ch
+        self.description = color + " " + "Pawn"
+        self.color_type = color
+
+        if self.color_type == "black":
+            self.image_name = "pawn_b_2.png"
+        elif self.color_type == "white":
+            self.image_name = "pawn_w_2.png"
+        else:
+            raise ValueError("No color")
+        self.rect = Chess.set_sprite(self, self.image_name, self.color_type)
+        self.previous_move = None
+
+class Pawn_3(pygame.sprite.Sprite):
+    def __init__(self, color, ch=None):
+        pygame.sprite.Sprite.__init__(self)
+        self.ch = ch
+        self.description = color + " " + "Pawn"
+        self.color_type = color
+
+        if self.color_type == "black":
+            self.image_name = "pawn_b_3.png"
+        elif self.color_type == "white":
+            self.image_name = "pawn_w_3.png"
+        else:
+            raise ValueError("No color")
+        self.rect = Chess.set_sprite(self, self.image_name, self.color_type)
+        self.previous_move = None
+
+class Pawn_4(pygame.sprite.Sprite):
+    def __init__(self, color, ch=None):
+        pygame.sprite.Sprite.__init__(self)
+        self.ch = ch
+        self.description = color + " " + "Pawn"
+        self.color_type = color
+
+        if self.color_type == "black":
+            self.image_name = "pawn_b_4.png"
+        elif self.color_type == "white":
+            self.image_name = "pawn_w_4.png"
+        else:
+            raise ValueError("No color")
+        self.rect = Chess.set_sprite(self, self.image_name, self.color_type)
+        self.previous_move = None
 
 class Knight(pygame.sprite.Sprite):
     def __init__(self, color):
@@ -230,6 +278,101 @@ class Cell:
                 selected_list += pawn_attack(1, 1)
                 selected_list += pawn_attack(-1, 1)
 
+        if isinstance(self.piece, Pawn_2):
+            if (self.position_y == 1 and self.piece.color_type == "black" and
+                current_list[self.position_x][self.position_y + 1].piece == "None") or (
+                    self.position_y == 6 and self.piece.color_type == "white" and
+                    current_list[self.position_x][self.position_y - 1].piece == "None"):
+                selected_list = ([[self.position_x, self.position_y - 1], [self.position_x, self.position_y - 2]]
+                                 if self.piece.color_type == 'white' else
+                                 [[self.position_x, self.position_y + 1], [self.position_x, self.position_y + 2]])
+            else:
+                selected_list = ([[self.position_x, self.position_y - 1]]
+                                 if self.piece.color_type == 'white' else
+                                 [[self.position_x, self.position_y + 1]])
+
+            for i in reversed(selected_list):
+                if current_list[i[0]][i[1]].piece != "None":
+                    selected_list.remove(i)
+
+            if self.piece.color_type == "white":
+                selected_list += pawn_attack(1, -1)
+                selected_list += pawn_attack(-1, -1)
+            elif self.piece.color_type == "black":
+                selected_list += pawn_attack(1, 1)
+                selected_list += pawn_attack(-1, 1)
+
+        if isinstance(self.piece, Pawn_3):
+            if (self.position_y == 1 and self.piece.color_type == "black" and
+                current_list[self.position_x][self.position_y + 1].piece == "None") or (
+                    self.position_y == 6 and self.piece.color_type == "white" and
+                    current_list[self.position_x][self.position_y - 1].piece == "None"):
+                selected_list = ([[self.position_x, self.position_y - 1], [self.position_x, self.position_y - 2]]
+                                 if self.piece.color_type == 'white' else
+                                 [[self.position_x, self.position_y + 1], [self.position_x, self.position_y + 2]])
+            else:
+                selected_list = ([[self.position_x, self.position_y - 1]]
+                                 if self.piece.color_type == 'white' else
+                                 [[self.position_x, self.position_y + 1]])
+
+            for i in reversed(selected_list):
+                if current_list[i[0]][i[1]].piece != "None":
+                    selected_list.remove(i)
+
+            if self.piece.color_type == "white":
+                selected_list += pawn_attack(1, -1)
+                selected_list += pawn_attack(-1, -1)
+            elif self.piece.color_type == "black":
+                selected_list += pawn_attack(1, 1)
+                selected_list += pawn_attack(-1, 1)
+
+        if isinstance(self.piece, Pawn_4):
+            if (self.position_y == 1 and self.piece.color_type == "black" and
+                current_list[self.position_x][self.position_y + 1].piece == "None") or (
+                    self.position_y == 6 and self.piece.color_type == "white" and
+                    current_list[self.position_x][self.position_y - 1].piece == "None"):
+                selected_list = ([[self.position_x, self.position_y - 1], [self.position_x, self.position_y - 2]]
+                                 if self.piece.color_type == 'white' else
+                                 [[self.position_x, self.position_y + 1], [self.position_x, self.position_y + 2]])
+            else:
+                selected_list = ([[self.position_x, self.position_y - 1]]
+                                 if self.piece.color_type == 'white' else
+                                 [[self.position_x, self.position_y + 1]])
+
+            for i in reversed(selected_list):
+                if current_list[i[0]][i[1]].piece != "None":
+                    selected_list.remove(i)
+
+            if self.piece.color_type == "white":
+                selected_list += pawn_attack(1, -1)
+                selected_list += pawn_attack(-1, -1)
+            elif self.piece.color_type == "black":
+                selected_list += pawn_attack(1, 1)
+                selected_list += pawn_attack(-1, 1)
+
+        if isinstance(self.piece, Pawn):
+            if (self.position_y == 1 and self.piece.color_type == "black" and
+                current_list[self.position_x][self.position_y + 1].piece == "None") or (
+                    self.position_y == 6 and self.piece.color_type == "white" and
+                    current_list[self.position_x][self.position_y - 1].piece == "None"):
+                selected_list = ([[self.position_x, self.position_y - 1], [self.position_x, self.position_y - 2]]
+                                 if self.piece.color_type == 'white' else
+                                 [[self.position_x, self.position_y + 1], [self.position_x, self.position_y + 2]])
+            else:
+                selected_list = ([[self.position_x, self.position_y - 1]]
+                                 if self.piece.color_type == 'white' else
+                                 [[self.position_x, self.position_y + 1]])
+
+            for i in reversed(selected_list):
+                if current_list[i[0]][i[1]].piece != "None":
+                    selected_list.remove(i)
+
+            if self.piece.color_type == "white":
+                selected_list += pawn_attack(1, -1)
+                selected_list += pawn_attack(-1, -1)
+            elif self.piece.color_type == "black":
+                selected_list += pawn_attack(1, 1)
+                selected_list += pawn_attack(-1, 1)
 
         elif isinstance(self.piece, Knight):
             selected_list = [[self.position_x + 2, self.position_y - 1], [self.position_x + 2, self.position_y + 1],
@@ -462,7 +605,7 @@ class Life:
         letters_list = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
         # self.cell_table = []
         # self.cell_list = []
-        self.number_of_moves = number_of_moves
+        self.number_of_moves_def = number_of_moves //2
         for x in range(8):
             for y in range(8):
                 # self.cell_list.append(Cell(x, y))
@@ -498,24 +641,42 @@ class Life:
             self.screen.blit(text_2, text_2_pos)
             counter_y += 1
         # добавление кнопок опций
-        options = ['new_game.png', 'last_move.png']
-        for name in options:
-            option_img = pygame.image.load(os.path.join(img_folder, name)).convert_alpha()
-            option_img = pygame.transform.scale(option_img, (game.cell_size // 1.2, game.cell_size // 1.2))
-            option_rect = option_img.get_rect()
-            if name == 'new_game.png':
-                option_rect.topleft = (6, 8)
-            elif name == 'last_move.png':
-                option_rect.topleft = (self.width - 9 - game.cell_size // 1.2, 8)
-            self.screen.blit(option_img, option_rect)
+        if number_of_moves == 0:
+            options = ['new_game.png', 'new_pieces.png']
+            for name in options:
+                option_img = pygame.image.load(os.path.join(img_folder, name)).convert_alpha()
+                option_img = pygame.transform.scale(option_img, (game.cell_size // 1.2, game.cell_size // 1.2))
+                option_rect = option_img.get_rect()
+                if name == 'new_game.png':
+                    option_rect.topleft = (6, 8)
+                elif name == 'new_pieces.png':
+                    option_rect.topleft = (self.width - 2 - game.cell_size // 1.2, 8)
+                self.screen.blit(option_img, option_rect)
+
+        else:
+            options = ['new_game.png', 'new_pieces_na.png']
+            for name in options:
+
+
+                option_img = pygame.image.load(os.path.join(img_folder, name)).convert_alpha()
+                option_img = pygame.transform.scale(option_img, (game.cell_size // 1.2, game.cell_size // 1.2))
+                option_rect = option_img.get_rect()
+
+                pygame.draw.rect(self.screen, (121, 121, 121),(self.width - 9 - game.cell_size // 1.2, 0, self.cell_size, self.cell_size))
+
+                if name == 'new_game.png':
+                    option_rect.topleft = (6, 8)
+                elif name == 'new_pieces_na.png':
+                    option_rect.topleft = (self.width - 2 - game.cell_size // 1.2, 8)
+                self.screen.blit(option_img, option_rect)
         #обновление количества ходов
-        number_txt = str(self.number_of_moves)
+        number_txt = str(self.number_of_moves_def)
         text_number = font.render(number_txt, True, (255, 255, 255))
-        if self.number_of_moves < 10:
+        if self.number_of_moves_def < 10:
             text_number_pos = (70 - self.cell_size // 1.6, 79 + self.cell_size * 8)
-        elif 10 <= self.number_of_moves < 100:
+        elif 10 <= self.number_of_moves_def < 100:
             text_number_pos = (70 - self.cell_size // 1.47, 79 + self.cell_size * 8)
-        elif self.number_of_moves >= 100:
+        elif self.number_of_moves_def >= 100:
             text_number_pos = (70 - self.cell_size // 1.25, 79 + self.cell_size * 8)
         pygame.draw.rect(self.screen, (121, 121, 121),
                          (70 - self.cell_size // 1.6,
@@ -536,7 +697,7 @@ class Life:
                     pygame.draw.rect(self.screen, (121, 121, 121),
                                      (self.width // 2 - 2 * self.cell_size + 1,
                                       self.height // 2 - 0.48 * self.cell_size - 5, self.cell_size * 4,
-                                      self.cell_size * 2), )
+                                      self.cell_size * 2))
                     pygame.draw.rect(self.screen, (0, 0, 0),
                                      (self.width // 2 - 2 * self.cell_size + 1,
                                       self.height // 2 - 0.48 * self.cell_size - 5,
@@ -562,6 +723,37 @@ class Life:
                         i -= 1
                     W = piece
         return W
+
+    def new_items(self):
+        self.color = 'white' if self.number_of_moves % 2 == 0 else 'black'
+
+        pygame.draw.rect(self.screen, (121, 121, 121),
+                         (self.width // 2 - 2 * self.cell_size + 1,
+                          self.height // 2 - 0.48 * self.cell_size - 5, self.cell_size * 4,
+                          self.cell_size * 2))
+        pygame.draw.rect(self.screen, (0, 0, 0),
+                         (self.width // 2 - 2 * self.cell_size + 1,
+                          self.height // 2 - 0.48 * self.cell_size - 5,
+                          self.cell_size * 4, self.cell_size * 2), 4)
+        pygame.font.init()
+        font = pygame.font.Font('GorgeousPixel.ttf', 60)
+        text_choose = 'Pawns:'
+        text_chose_f = font.render(text_choose, True, (0, 0, 0))
+        text_choose_pos = (self.width // 2 - self.cell_size * 1.5, self.height // 2 - self.cell_size * 0.5)
+        self.screen.blit(text_chose_f, text_choose_pos)
+        if self.color == 'black':
+            options = ['pawn_b.png', 'pawn_b_2.png', 'pawn_b_3.png', 'pawn_b_4.png']
+        else:
+            options = ['pawn_w.png', 'pawn_w_2.png', 'pawn_w_3.png', 'pawn_w_4.png']
+        i = 2
+        for name in options:
+            option_img = pygame.image.load(os.path.join(img_folder, name)).convert_alpha()
+            option_img = pygame.transform.scale(option_img, (self.cell_size, self.cell_size))
+            option_rect = option_img.get_rect()
+            option_rect.bottomleft = (
+                self.width // 2 - i * self.cell_size, self.height // 2 + self.cell_size * 1.35)
+            self.screen.blit(option_img, option_rect)
+            i -= 1
 
     # функция первоначального размещения фигур на доске
     def make_units(self):
@@ -634,6 +826,8 @@ class Life:
     # запуск иггры
     def run_game(self):
         pygame.init()
+        new = False
+        Touch = False
         # clock = pygame.time.Clock()
         self.all_sprites = pygame.sprite.Group()
         pygame.display.set_caption('Chess')
@@ -649,7 +843,7 @@ class Life:
             # обработка нажатий мышкой в игре
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    game = False
+                    sys.exit(0)
                 elif event.type == MOUSEBUTTONDOWN:
                     mouse_click = True
                     x_pos = (pygame.mouse.get_pos()[0] - 70) // self.cell_size
@@ -673,9 +867,53 @@ class Life:
                             Chess.load_unit(self, piece.ch, new_piece.rect)
                             piece.kill()
                             self.all_sprites.add(new_piece)
+
+                    if x_pos == 8 and y_pos == -1 and self.number_of_moves == 0 and press_key == (None, None):
+                        Touch = True
+
                     else:
+                        if Touch:
+                            if 2 <= x_pos <= 5 and y_pos == 4:
+                                new_piece_b = None
+                                new_piece_w = None
+                                for x in range(8):
+                                    if x_pos == 2:
+                                        new_piece_b = Pawn('black')
+                                        new_piece_w = Pawn('white')
+                                    if x_pos == 3:
+                                        new_piece_b = Pawn_2('black')
+                                        new_piece_w = Pawn_2('white')
+                                    if x_pos == 4:
+                                        new_piece_b = Pawn_3('black')
+                                        new_piece_w = Pawn_3('white')
+                                    if x_pos == 5:
+                                        new_piece_b = Pawn_4('black')
+                                        new_piece_w = Pawn_4('white')
+
+
+                                    self.cell_table.list[x][1].piece.kill()
+                                    self.cell_table.list[x][1] = Cell(x, 1, new_piece_b)
+
+                                    Chess.load_unit(self, (x, 1), new_piece_b.rect)
+
+                                    self.all_sprites.add(new_piece_b)
+
+                                    self.cell_table.list[x][6].piece.kill()
+                                    self.cell_table.list[x][6] = Cell(x, 6, new_piece_w)
+                                    Chess.load_unit(self, (x, 6), new_piece_w.rect)
+
+                                    self.all_sprites.add(new_piece_w)
+
+                                    new_piece_b = None
+                                    new_piece_w = None
+
+                                    Touch = False
+                                    press_key = (None, None)
+                            else:
+                                pass
+
                         # нажатия на клетки поля
-                        if 0 <= x_pos <= 7 and 0 <= y_pos <= 7:
+                        elif 0 <= x_pos <= 7 and 0 <= y_pos <= 7:
                             if press_key[0] == x_pos and press_key[1] == y_pos:
 
                                 self.cell_table.list[x_pos][y_pos].state = 'Unselected'
@@ -716,6 +954,10 @@ class Life:
                                         press_key = (x_pos, y_pos)
 
                         # нажатия за границы поля
+                        elif  x_pos == -1 and y_pos == -1:
+                            game = False
+                            new = True
+
                         else:
                             if press_key != (None, None):
                                 self.cell_table.list[press_key[0]][press_key[1]].state = 'Unselected'
@@ -727,6 +969,8 @@ class Life:
             if mouse_click:
                 if self.choose():
                     pass
+                elif Touch:
+                    self.new_items()
                 else:
                     self.make_board(self.number_of_moves)
                     self.cell_table.draw_check()
@@ -741,10 +985,13 @@ class Life:
                 pygame.display.flip()
                 mouse_click = False
             # clock.tick(self.fps)
-        pygame.quit()
+        #pygame.quit()
+        return new
 
 
 # запуск игры
 if __name__ == '__main__':
     game = Life(700, 700, 70, 5)
-    game.run_game()
+    new = True
+    while new:
+        new = game.run_game()
