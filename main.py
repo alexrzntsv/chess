@@ -443,7 +443,7 @@ class CellList:
                         if cell_list[i[0]][i[1]].piece != "None":
                             cell_list[row][column], new_cel = new_cel, cell_list[row][column]
                         cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
-                        if not(d[0]) and cell_list[row][column].piece.color_type != d[1]:
+                        if not(d[0]) or (d[0] and cell_list[row][column].piece.color_type != d[1]):
                             pygame.draw.rect(self.surface, (161, 211, 134) if (i[0] + i[1]) % 2 == 0 else (24, 63, 33),
                                              (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
                                               self.cell_size - 1, self.cell_size - 1))
@@ -519,11 +519,11 @@ class CellList:
                         if cell_list[i[0]][i[1]].piece != "None":
                             new_cel = Cell()
                             cell_list[row][column], new_cel = new_cel, cell_list[row][column]
-                        d = self.chess_check(cell_list)
+                        d = self.chess_check(cell_list, get_color=True)
                         if cell_list[i[0]][i[1]].piece != "None":
                             cell_list[row][column], new_cel = new_cel, cell_list[row][column]
                         cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
-                        if d:
+                        if (d[0]) and not(d[0] and cell_list[row][column].piece.color_type != d[1]):
                             selected_list.remove(i)
 
                     for i in selected_list:
