@@ -799,7 +799,7 @@ class Life:
         text_chose_f = font.render(text_choose, True, (0, 0, 0))
         text_choose_pos = (self.width // 2 - self.cell_size * 1.05, self.height // 2 - self.cell_size * 0.5)
         self.screen.blit(text_chose_f, text_choose_pos)
-        if self.color == 'white':
+        if self.color == 'black':
             options = ['king_w.png']
         else:
             options = ['king_b.png']
@@ -1000,7 +1000,6 @@ class Life:
                         Draw = False
 
                     else:
-
                         # выбор фигуры для пешки на краю доски
                         if self.choose():
                             piece = self.choose()
@@ -1023,9 +1022,7 @@ class Life:
                         if x_pos == 8 and y_pos == -1 and self.number_of_moves == 0 and press_key == (None, None):
                             Touch = True
 
-                        if self.moves_of_50(moves_of_50_count) and x_pos == 8 and y_pos == 8:
-                            self.draw()
-                            Draw = True
+
 
                         else:
                             if Touch:
@@ -1165,12 +1162,7 @@ class Life:
                     pass
                 elif Touch:
                     self.new_items()
-                elif self.moves_of_50(moves_of_50_count) and x_pos == 8 and y_pos == 8:
-                    self.draw()
-                elif self.cell_table.chess_check(self.cell_table.list, get_color=True)[0] == True:
-                    checkmate = self.cell_table.checkmate(color=self.cell_table.chess_check(self.cell_table.list, get_color=True)[1])
-                    if checkmate[0]:
-                        self.win(color=checkmate[1])
+
 
                 else:
                     self.make_board(self.number_of_moves)
@@ -1182,6 +1174,18 @@ class Life:
                     self.screen.blit(self.surface1, (0, 0))
                     self.all_sprites.draw(self.screen)
                     self.make_lines()
+
+                    if self.cell_table.chess_check(self.cell_table.list, get_color=True)[0] == True:
+                        checkmate = self.cell_table.checkmate(
+                            color=self.cell_table.chess_check(self.cell_table.list, get_color=True)[1])
+                        if checkmate[0]:
+                            self.win(color=checkmate[1])
+                            Draw = True
+
+                    if self.moves_of_50(moves_of_50_count) and x_pos == 8 and y_pos == 8:
+                        self.draw()
+                        Draw = True
+
                 # self.choose('black')
                 # self.choose('white')
                 pygame.display.flip()
