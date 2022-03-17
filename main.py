@@ -38,7 +38,7 @@ class Pawn(pygame.sprite.Sprite):
         self.ch = ch
         self.description = color + " " + "Pawn"
         self.color_type = color
-
+        self.n_moves = 0
         if self.color_type == "black":
             self.image_name = "pawn_b.png"
         elif self.color_type == "white":
@@ -54,7 +54,7 @@ class Pawn_2(pygame.sprite.Sprite):
         self.ch = ch
         self.description = color + " " + "Pawn"
         self.color_type = color
-
+        self.n_moves = 0
         if self.color_type == "black":
             self.image_name = "pawn_b_2.png"
         elif self.color_type == "white":
@@ -70,7 +70,7 @@ class Pawn_3(pygame.sprite.Sprite):
         self.ch = ch
         self.description = color + " " + "Pawn"
         self.color_type = color
-
+        self.n_moves = 0
         if self.color_type == "black":
             self.image_name = "pawn_b_3.png"
         elif self.color_type == "white":
@@ -86,7 +86,7 @@ class Pawn_4(pygame.sprite.Sprite):
         self.ch = ch
         self.description = color + " " + "Pawn"
         self.color_type = color
-
+        self.n_moves = 0
         if self.color_type == "black":
             self.image_name = "pawn_b_4.png"
         elif self.color_type == "white":
@@ -101,6 +101,7 @@ class Knight(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.description = color + " " + "Knight"
         self.color_type = color
+        self.n_moves = 0
         if self.color_type == "black":
             self.image_name = "knight_b.png"
         elif self.color_type == "white":
@@ -115,6 +116,7 @@ class Queen(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.description = color + " " + "Queen"
         self.color_type = color
+        self.n_moves = 0
         if self.color_type == "black":
             self.image_name = "queen_b.png"
         elif self.color_type == "white":
@@ -129,6 +131,7 @@ class King(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.description = color + " " + "King"
         self.color_type = color
+        self.n_moves = 0
         if self.color_type == "black":
             self.image_name = "king_b.png"
         elif self.color_type == "white":
@@ -143,6 +146,7 @@ class Bishop(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.description = color + " " + "Bishop"
         self.color_type = color
+        self.n_moves = 0
         if self.color_type == "black":
             self.image_name = "bishop_b.png"
         elif self.color_type == "white":
@@ -157,7 +161,7 @@ class Rook(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.description = color + " " + "Rook"
         self.color_type = color
-
+        self.n_moves = 0
         if self.color_type == "black":
             self.image_name = "rook_b.png"
         elif self.color_type == "white":
@@ -364,6 +368,24 @@ class Cell:
                              [self.position_x + 1, self.position_y + 1], [self.position_x - 1, self.position_y - 1],
                              [self.position_x + 1, self.position_y - 1], [self.position_x - 1, self.position_y + 1]]
 
+            def check_rook(x_1, y_1, x_2, y_2):
+                none_lst = [current_list[i][y_2].piece for i in range(min(x_1, x_2)+1, max(x_1, x_2))]
+                if isinstance(current_list[x_2][y_2].piece, Rook) and (current_list[x_2][y_2].piece.n_moves == 0) \
+                        and self.piece.color_type == current_list[x_2][y_2].piece.color_type and all([i == 'None' for i in none_lst]):
+                    return [[x_2, y_2]]
+
+            if self.piece.n_moves == 0:
+                if self.piece.color_type == 'white':
+                    rook_lst = ([0, 7], [7, 7])
+                elif self.piece.color_type == 'black':
+                    rook_lst = ([0, 0], [7, 0])
+                for i in rook_lst:
+                    try:
+                        selected_list += check_rook(self.position_x, self.position_y, i[0], i[1])
+                    except TypeError:
+                        pass
+
+
         elif isinstance(self.piece, Queen):
             selected_list = rook()
             selected_list += bishop()
@@ -379,8 +401,9 @@ class Cell:
         # проверка на заполнение клеток с фигурами того же цвета
         for i in reversed(selected_list):
             try:
-                if current_list[i[0]][i[1]].piece.color_type == self.piece.color_type:
-                    selected_list.remove(i)
+                if (current_list[i[0]][i[1]].piece.color_type == self.piece.color_type):
+                    if not(isinstance(self.piece, King) and isinstance(current_list[i[0]][i[1]].piece, Rook)):
+                        selected_list.remove(i)
             except AttributeError:
                 pass
 
@@ -541,7 +564,7 @@ class CellList:
                     for i in selected_list:
                         # если ход возможен, фигура ходит
                         if i[0] == self.x_n and i[1] == self.y_n:
-
+                            cell_list[row][column].piece.n_moves += 1
                             # уничтожение атакованной фигуры
                             if cell_list[self.x_n][self.y_n].piece != 'None':
                                 cell_list[self.x_n][self.y_n].piece.kill()
@@ -608,21 +631,6 @@ class CellList:
         else:
             return (False, None)
 
-    #пат
-    def stalemate(self, color):
-        cell_list = self.list
-        counter = 0
-        for row in range(len(cell_list)):
-            for column in range(len(cell_list[row])):
-                if cell_list[row][column].piece != 'None' and cell_list[row][column].piece.color_type == color:
-                    selected_list = cell_list[row][column].show_variants(cell_list)
-
-                    if len(selected_list) != 0:
-                        counter += 1
-        if counter == 0:
-            return (True, color)
-        else:
-            return (False, None)
 
 
 # класс игры
@@ -1110,16 +1118,16 @@ class Life:
 
                                             Q += 1
 
-
-
-                                            # !!!!!!!!!!!!!!!!!!!!turn = ("white" if turn =="black" else "black")
+                                            turn = ("white" if turn =="black" else "black")
                                         else:
-                                            #!!!!!!!!!!!!!!!if self.cell_table.list[x_pos][y_pos].piece.color_type == turn:
-                                            self.cell_table.list[press_key[0]][press_key[1]].state = 'Unselected'
-                                            self.cell_table.draw()
-                                            self.cell_table.list[x_pos][y_pos].state = 'Selected'
-                                            press_key = (x_pos, y_pos)
-
+                                            try:
+                                                if self.cell_table.list[x_pos][y_pos].piece.color_type == turn:
+                                                    self.cell_table.list[press_key[0]][press_key[1]].state = 'Unselected'
+                                                    self.cell_table.draw()
+                                                    self.cell_table.list[x_pos][y_pos].state = 'Selected'
+                                                    press_key = (x_pos, y_pos)
+                                            except AttributeError:
+                                                pass
                                         if Q == 2:
                                             if Q_m:
                                                 moves_of_50_count = 0
@@ -1131,10 +1139,12 @@ class Life:
                                         Q_50 = False
 
                                     else:
-                                        #!!!!!!!!!!!!!!!!!if self.cell_table.list[x_pos][y_pos].piece.color_type == turn:
-                                            self.cell_table.list[x_pos][y_pos].state = 'Selected'
-                                            press_key = (x_pos, y_pos)
-
+                                        try:
+                                            if self.cell_table.list[x_pos][y_pos].piece.color_type == turn:
+                                                self.cell_table.list[x_pos][y_pos].state = 'Selected'
+                                                press_key = (x_pos, y_pos)
+                                        except AttributeError:
+                                            pass
                             # нажатия за границы поля
                             elif x_pos == -1 and y_pos == -1:
                                 for piece in self.all_sprites:
@@ -1167,7 +1177,6 @@ class Life:
                 else:
                     self.make_board(self.number_of_moves)
                     self.cell_table.chess_check(self.cell_table.list, draw=True)
-                    self.cell_table.stalemate(color=turn)
                     self.cell_table.draw_check()
                     self.cell_table.draw()
                     self.moves_of_50(moves_of_50_count)
@@ -1180,6 +1189,11 @@ class Life:
                             color=self.cell_table.chess_check(self.cell_table.list, get_color=True)[1])
                         if checkmate[0]:
                             self.win(color=checkmate[1])
+                            Draw = True
+                    else:
+                        stalemate = self.cell_table.checkmate(color=turn)
+                        if stalemate[0]:
+                            self.draw()
                             Draw = True
 
                     if self.moves_of_50(moves_of_50_count) and x_pos == 8 and y_pos == 8:
