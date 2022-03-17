@@ -444,11 +444,11 @@ class CellList:
         self.color = color
 
         pygame.draw.rect(self.screen, (121, 121, 121),
-                         (self.width // 2 - 2 * self.cell_size + 1,
-                          self.height // 2 - 0.48 * self.cell_size - 5, self.cell_size * 4,
+                         (self.width // 2 - 1 * self.cell_size + 1,
+                          self.height // 2 - 0.48 * self.cell_size - 5, self.cell_size * 2,
                           self.cell_size * 2))
         pygame.draw.rect(self.screen, (0, 0, 0),
-                         (self.width // 2 - 2 * self.cell_size + 1,
+                         (self.width // 2 - 1 * self.cell_size + 1,
                           self.height // 2 - 0.48 * self.cell_size - 5,
                           self.cell_size * 4, self.cell_size * 2), 4)
         pygame.font.init()
@@ -581,6 +581,31 @@ class CellList:
         pygame.draw.rect(self.surface, (192, 192, 192) if (i[0] + i[1]) % 2 == 0 else (21, 34, 45),
                          (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
                           self.cell_size - 1, self.cell_size - 1))
+    def checkmate(self, color):
+        cell_list = self.list
+        chess_counter = 0
+        for row in range(len(cell_list)):
+            for column in range(len(cell_list[row])):
+                if cell_list[row][column].piece != 'None' and cell_list[row][column].piece.color_type == color:
+                    selected_list = cell_list[row][column].show_variants(cell_list)
+                    for i in selected_list[:]:
+                        cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
+                        if cell_list[i[0]][i[1]].piece != "None":
+                            new_cel = Cell()
+                            cell_list[row][column], new_cel = new_cel, cell_list[row][column]
+                        d = self.chess_check(cell_list, get_color=True)
+                        if cell_list[i[0]][i[1]].piece != "None":
+                            cell_list[row][column], new_cel = new_cel, cell_list[row][column]
+                        cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
+                        if (d[0]) and not(d[0] and cell_list[row][column].piece.color_type != d[1]):
+                            selected_list.remove(i)
+                    if len(selected_list) != 0:
+                        chess_counter += 1
+        print(chess_counter)
+        if chess_counter == 0:
+            return (True, color)
+        else:
+            return (False, None)
 
 # класс игры
 class Life:
@@ -738,6 +763,37 @@ class Life:
                         i -= 1
                     W = piece
         return W
+    def win(self, color):
+
+        self.color = color
+
+        pygame.draw.rect(self.screen, (121, 121, 121),
+                         (self.width // 2 - 1 * self.cell_size + 1,
+                          self.height // 2 - 0.48 * self.cell_size - 5, self.cell_size * 2,
+                          self.cell_size * 2))
+        pygame.draw.rect(self.screen, (0, 0, 0),
+                         (self.width // 2 - 1 * self.cell_size + 1,
+                          self.height // 2 - 0.48 * self.cell_size - 5,
+                          self.cell_size * 2, self.cell_size * 2), 4)
+        pygame.font.init()
+        font = pygame.font.Font('GorgeousPixel.ttf', 60)
+        text_choose = ' Win '
+        text_chose_f = font.render(text_choose, True, (0, 0, 0))
+        text_choose_pos = (self.width // 2 - self.cell_size * 1.05, self.height // 2 - self.cell_size * 0.5)
+        self.screen.blit(text_chose_f, text_choose_pos)
+        if self.color == 'white':
+            options = ['king_w.png']
+        else:
+            options = ['king_b.png']
+        i = 0.5
+        for name in options:
+            option_img = pygame.image.load(os.path.join(img_folder, name)).convert_alpha()
+            option_img = pygame.transform.scale(option_img, (self.cell_size, self.cell_size))
+            option_rect = option_img.get_rect()
+            option_rect.bottomleft = (
+                self.width // 2 - i * self.cell_size, self.height // 2 + self.cell_size * 1.35)
+            self.screen.blit(option_img, option_rect)
+            i -= 1
 
     def new_items(self):
         self.color = 'white' if self.number_of_moves % 2 == 0 else 'black'
@@ -1093,10 +1149,15 @@ class Life:
                     self.new_items()
                 elif self.moves_of_50(moves_of_50_count) and x_pos == 8 and y_pos == 8:
                     self.draw()
+                elif self.cell_table.chess_check(self.cell_table.list, get_color=True)[0] == True:
+                    checkmate = self.cell_table.checkmate(color=self.cell_table.chess_check(self.cell_table.list, get_color=True)[1])
+                    if checkmate[0]:
+                        self.win(color=checkmate[1])
 
                 else:
                     self.make_board(self.number_of_moves)
                     self.cell_table.chess_check(self.cell_table.list, draw=True)
+
                     self.cell_table.draw_check()
                     self.cell_table.draw()
                     self.moves_of_50(moves_of_50_count)
