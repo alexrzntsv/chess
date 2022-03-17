@@ -581,6 +581,7 @@ class CellList:
         pygame.draw.rect(self.surface, (192, 192, 192) if (i[0] + i[1]) % 2 == 0 else (21, 34, 45),
                          (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
                           self.cell_size - 1, self.cell_size - 1))
+    # мат
     def checkmate(self, color):
         cell_list = self.list
         chess_counter = 0
@@ -601,11 +602,28 @@ class CellList:
                             selected_list.remove(i)
                     if len(selected_list) != 0:
                         chess_counter += 1
-        print(chess_counter)
+
         if chess_counter == 0:
             return (True, color)
         else:
             return (False, None)
+
+    #пат
+    def stalemate(self, color):
+        cell_list = self.list
+        counter = 0
+        for row in range(len(cell_list)):
+            for column in range(len(cell_list[row])):
+                if cell_list[row][column].piece != 'None' and cell_list[row][column].piece.color_type == color:
+                    selected_list = cell_list[row][column].show_variants(cell_list)
+
+                    if len(selected_list) != 0:
+                        counter += 1
+        if counter == 0:
+            return (True, color)
+        else:
+            return (False, None)
+
 
 # класс игры
 class Life:
@@ -1157,7 +1175,7 @@ class Life:
                 else:
                     self.make_board(self.number_of_moves)
                     self.cell_table.chess_check(self.cell_table.list, draw=True)
-
+                    self.cell_table.stalemate(color=turn)
                     self.cell_table.draw_check()
                     self.cell_table.draw()
                     self.moves_of_50(moves_of_50_count)
