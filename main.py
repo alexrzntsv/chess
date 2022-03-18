@@ -565,6 +565,23 @@ class CellList:
                         # если ход возможен, фигура ходит
                         if i[0] == self.x_n and i[1] == self.y_n:
                             cell_list[row][column].piece.n_moves += 1
+                            #рокировка
+                            if type(cell_list[self.x_pr][self.y_pr].piece) == King and type(cell_list[self.x_n][self.y_n].piece) == Rook:
+                                rook_pos_x = self.x_n
+                                if self.x_pr < self.x_n:
+                                    self.x_n = self.x_pr + 2
+                                    Chess.load_unit(self, (self.x_pr+1, self.y_n),
+                                                    cell_list[rook_pos_x][self.y_pr].piece.rect)
+                                    cell_list[self.x_pr+1][self.y_n] = Cell(self.x_pr+1, self.y_n,
+                                                                         cell_list[rook_pos_x][self.y_pr].piece,
+                                                                         'Unselected')
+                                else:
+                                    self.x_n = self.x_pr - 2
+                                    Chess.load_unit(self, (self.x_pr-1, self.y_n),
+                                                    cell_list[rook_pos_x][self.y_pr].piece.rect)
+                                    cell_list[self.x_pr-1][self.y_n] = Cell(self.x_pr-1, self.y_n,
+                                                                         cell_list[rook_pos_x][self.y_pr].piece,
+                                                                         'Unselected')
                             # уничтожение атакованной фигуры
                             if cell_list[self.x_n][self.y_n].piece != 'None':
                                 cell_list[self.x_n][self.y_n].piece.kill()
