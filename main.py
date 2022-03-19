@@ -545,6 +545,7 @@ class CellList:
                                     cell_list[self.x_pr+1][self.y_n] = Cell(self.x_pr+1, self.y_n,
                                                                          cell_list[rook_pos_x][self.y_pr].piece,
                                                                          'Unselected')
+
                                 else:
                                     self.x_n = self.x_pr - 2
                                     Chess.load_unit(self, (self.x_pr-1, self.y_n),
@@ -575,6 +576,12 @@ class CellList:
                                 self.list[self.x_n][self.y_n].piece.previous_move = abs(self.y_n - self.y_pr)
                                 if (self.y_n == 0 or self.y_n == 7):
                                     cell_list[self.x_n][self.y_n].piece.ch = (self.x_n, self.y_n)
+
+                            if type(cell_list[self.x_pr][self.y_pr].piece) == King and cell_list[self.x_pr][self.y_pr].piece.n_moves == 1:
+                                self.undraw_now(0, 7)
+                                self.undraw_now(7, 7)
+                                self.undraw_now(7, 0)
+                                self.undraw_now(0, 0)
 
                             return True
                     # если ход не возможен, убирается выделение клеток
@@ -1180,8 +1187,9 @@ class Life:
                     else:
                         stalemate = self.cell_table.checkmate(color=turn)
                         if stalemate[0]:
-                            self.draw()
-                            Draw = True
+                            if len(self.all_sprites.sprites()) != 0:
+                                self.draw()
+                                Draw = True
 
                     if self.moves_of_50(moves_of_50_count) and x_pos == 8 and y_pos == 8:
                         self.draw()
