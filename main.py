@@ -204,6 +204,7 @@ class Cell:
 
     # функция, определяющая возможные ходы для фигуры
     def show_variants(self, current_list):
+
         def calc(res, x=0, y=0):
             d1 = 1
             lst = list(range(0, 8))
@@ -240,6 +241,38 @@ class Cell:
 
             return res
 
+        def straight_pawn_move():
+            if (self.position_y == 1 and self.piece.color_type == "black" and
+                current_list[self.position_x][self.position_y + 1].piece == "None") or (
+                    self.position_y == 6 and self.piece.color_type == "white" and
+                    current_list[self.position_x][self.position_y - 1].piece == "None"):
+                selected_list = ([[self.position_x, self.position_y - 1], [self.position_x, self.position_y - 2]]
+                                 if self.piece.color_type == 'white' else
+                                 [[self.position_x, self.position_y + 1], [self.position_x, self.position_y + 2]])
+            else:
+                selected_list = ([[self.position_x, self.position_y - 1]]
+                                 if self.piece.color_type == 'white' else
+                                 [[self.position_x, self.position_y + 1]])
+            try:
+                for i in reversed(selected_list):
+                    if current_list[i[0]][i[1]].piece != "None":
+                        selected_list.remove(i)
+            except IndexError:
+                pass
+            return selected_list
+
+        def diag_pawn_move():
+            selected_list = ([[self.position_x + 1, self.position_y - 1], [self.position_x - 1, self.position_y - 1]]
+                             if self.piece.color_type == 'white' else
+                             [[self.position_x + 1, self.position_y + 1], [self.position_x - 1, self.position_y + 1]])
+            try:
+                for i in reversed(selected_list):
+                    if current_list[i[0]][i[1]].piece != "None":
+                        selected_list.remove(i)
+            except IndexError:
+                pass
+            return selected_list
+
         def pawn_attack(x,y):
             try:
                 lst = ([[self.position_x + x, self.position_y + y]] if
@@ -248,10 +281,7 @@ class Cell:
                 lst = []
             # Проверка на взятие на проходе
             try:
-                if (type(current_list[self.position_x + x][self.position_y].piece) == Pawn or \
-                    type(current_list[self.position_x + x][self.position_y].piece) == Pawn_2 or \
-                    type(current_list[self.position_x + x][self.position_y].piece) == Pawn_3 or \
-                    type(current_list[self.position_x + x][self.position_y].piece) == Pawn_4) and \
+                if type(current_list[self.position_x + x][self.position_y].piece) == Pawn and \
                         current_list[self.position_x + x][self.position_y].piece.color_type != self.piece.color_type and \
                         current_list[self.position_x + x][self.position_y].piece.previous_move == 2:
                     lst += [[self.position_x + x, self.position_y + y]]
@@ -261,21 +291,7 @@ class Cell:
 
 
         if isinstance(self.piece, Pawn):
-            if (self.position_y == 1 and self.piece.color_type == "black" and
-                current_list[self.position_x][self.position_y + 1].piece == "None") or (
-                    self.position_y == 6 and self.piece.color_type == "white" and
-                    current_list[self.position_x][self.position_y - 1].piece == "None"):
-                selected_list = ([[self.position_x, self.position_y - 1], [self.position_x, self.position_y - 2]]
-                                 if self.piece.color_type == 'white' else
-                                 [[self.position_x, self.position_y + 1], [self.position_x, self.position_y + 2]])
-            else:
-                selected_list = ([[self.position_x, self.position_y - 1]]
-                                 if self.piece.color_type == 'white' else
-                                 [[self.position_x, self.position_y + 1]])
-
-            for i in reversed(selected_list):
-                if current_list[i[0]][i[1]].piece != "None":
-                    selected_list.remove(i)
+            selected_list = straight_pawn_move()
 
             if self.piece.color_type == "white":
                 selected_list += pawn_attack(1, -1)
@@ -285,69 +301,23 @@ class Cell:
                 selected_list += pawn_attack(-1, 1)
 
         if isinstance(self.piece, Pawn_2):
-            if (self.position_y == 1 and self.piece.color_type == "black" and
-                current_list[self.position_x][self.position_y + 1].piece == "None") or (
-                    self.position_y == 6 and self.piece.color_type == "white" and
-                    current_list[self.position_x][self.position_y - 1].piece == "None"):
-                selected_list = ([[self.position_x, self.position_y - 1], [self.position_x, self.position_y - 2]]
-                                 if self.piece.color_type == 'white' else
-                                 [[self.position_x, self.position_y + 1], [self.position_x, self.position_y + 2]])
-            else:
-                selected_list = ([[self.position_x, self.position_y - 1]]
-                                 if self.piece.color_type == 'white' else
-                                 [[self.position_x, self.position_y + 1]])
-
-            for i in reversed(selected_list):
-                if current_list[i[0]][i[1]].piece != "None":
-                    selected_list.remove(i)
+            selected_list = diag_pawn_move()
 
             if self.piece.color_type == "white":
-                selected_list += pawn_attack(1, -1)
-                selected_list += pawn_attack(-1, -1)
+                selected_list += pawn_attack(0, -1)
             elif self.piece.color_type == "black":
-                selected_list += pawn_attack(1, 1)
-                selected_list += pawn_attack(-1, 1)
+                selected_list += pawn_attack(0, 1)
 
         if isinstance(self.piece, Pawn_3):
-            if (self.position_y == 1 and self.piece.color_type == "black" and
-                current_list[self.position_x][self.position_y + 1].piece == "None") or (
-                    self.position_y == 6 and self.piece.color_type == "white" and
-                    current_list[self.position_x][self.position_y - 1].piece == "None"):
-                selected_list = ([[self.position_x, self.position_y - 1], [self.position_x, self.position_y - 2]]
-                                 if self.piece.color_type == 'white' else
-                                 [[self.position_x, self.position_y + 1], [self.position_x, self.position_y + 2]])
-            else:
-                selected_list = ([[self.position_x, self.position_y - 1]]
-                                 if self.piece.color_type == 'white' else
-                                 [[self.position_x, self.position_y + 1]])
-
-            for i in reversed(selected_list):
-                if current_list[i[0]][i[1]].piece != "None":
-                    selected_list.remove(i)
+            selected_list = straight_pawn_move()
 
             if self.piece.color_type == "white":
-                selected_list += pawn_attack(1, -1)
-                selected_list += pawn_attack(-1, -1)
+                selected_list += pawn_attack(0, -1)
             elif self.piece.color_type == "black":
-                selected_list += pawn_attack(1, 1)
-                selected_list += pawn_attack(-1, 1)
+                selected_list += pawn_attack(0, 1)
 
         if isinstance(self.piece, Pawn_4):
-            if (self.position_y == 1 and self.piece.color_type == "black" and
-                current_list[self.position_x][self.position_y + 1].piece == "None") or (
-                    self.position_y == 6 and self.piece.color_type == "white" and
-                    current_list[self.position_x][self.position_y - 1].piece == "None"):
-                selected_list = ([[self.position_x, self.position_y - 1], [self.position_x, self.position_y - 2]]
-                                 if self.piece.color_type == 'white' else
-                                 [[self.position_x, self.position_y + 1], [self.position_x, self.position_y + 2]])
-            else:
-                selected_list = ([[self.position_x, self.position_y - 1]]
-                                 if self.piece.color_type == 'white' else
-                                 [[self.position_x, self.position_y + 1]])
-
-            for i in reversed(selected_list):
-                if current_list[i[0]][i[1]].piece != "None":
-                    selected_list.remove(i)
+            selected_list = diag_pawn_move()
 
             if self.piece.color_type == "white":
                 selected_list += pawn_attack(1, -1)
@@ -583,14 +553,14 @@ class CellList:
                                                                          cell_list[rook_pos_x][self.y_pr].piece,
                                                                          'Unselected')
                             # уничтожение атакованной фигуры
-                            if cell_list[self.x_n][self.y_n].piece != 'None':
-                                cell_list[self.x_n][self.y_n].piece.kill()
+                            try:
+                                if cell_list[self.x_n][self.y_n].piece != 'None':
+                                    cell_list[self.x_n][self.y_n].piece.kill()
+                            except IndexError:
+                                pass
 
                             # взятие на проходе
-                            if (type(cell_list[self.x_pr][self.y_pr].piece) == Pawn or \
-                                type(cell_list[self.x_pr][self.y_pr].piece) == Pawn_2 or \
-                                type(cell_list[self.x_pr][self.y_pr].piece) == Pawn_3 or \
-                                type(cell_list[self.x_pr][self.y_pr].piece) == Pawn_4) and \
+                            if type(cell_list[self.x_pr][self.y_pr].piece) == Pawn and \
                                     cell_list[self.x_n][self.y_n].piece == 'None' and \
                                     (self.x_n != self.x_pr):
                                 cell_list[self.x_n][self.y_pr].piece.kill()
