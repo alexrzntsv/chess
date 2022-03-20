@@ -7,6 +7,7 @@ from pygame.locals import *
 game_folder = os.path.dirname(__file__)
 img_folder = os.path.join(game_folder, 'img')
 
+
 # класс с общими для всех фигур функциями
 class Chess():
     def __init__(self):
@@ -48,6 +49,7 @@ class Pawn(pygame.sprite.Sprite):
         self.rect = Chess.set_sprite(self, self.image_name, self.color_type)
         self.previous_move = None
 
+
 class Pawn_2(pygame.sprite.Sprite):
     def __init__(self, color, ch=None):
         pygame.sprite.Sprite.__init__(self)
@@ -63,6 +65,7 @@ class Pawn_2(pygame.sprite.Sprite):
             raise ValueError("No color")
         self.rect = Chess.set_sprite(self, self.image_name, self.color_type)
         self.previous_move = None
+
 
 class Pawn_3(pygame.sprite.Sprite):
     def __init__(self, color, ch=None):
@@ -80,6 +83,7 @@ class Pawn_3(pygame.sprite.Sprite):
         self.rect = Chess.set_sprite(self, self.image_name, self.color_type)
         self.previous_move = None
 
+
 class Pawn_4(pygame.sprite.Sprite):
     def __init__(self, color, ch=None):
         pygame.sprite.Sprite.__init__(self)
@@ -95,6 +99,7 @@ class Pawn_4(pygame.sprite.Sprite):
             raise ValueError("No color")
         self.rect = Chess.set_sprite(self, self.image_name, self.color_type)
         self.previous_move = None
+
 
 class Knight(pygame.sprite.Sprite):
     def __init__(self, color):
@@ -173,7 +178,8 @@ class Rook(pygame.sprite.Sprite):
 
 # класс отдельных ячеек с текцщим состоянием и хранением в памяти двух фигур (текущей и предыдущей)
 class Cell:
-    def __init__(self, position_x=0, position_y=0, piece="None", state=None, previous="None", state_piece=None, state_check=None):
+    def __init__(self, position_x=0, position_y=0, piece="None", state=None, previous="None", state_piece=None,
+                 state_check=None):
         self.position_x = position_x
         self.position_y = position_y
         self.piece = piece
@@ -273,10 +279,11 @@ class Cell:
                 pass
             return selected_list
 
-        def pawn_attack(x,y):
+        def pawn_attack(x, y):
             try:
                 lst = ([[self.position_x + x, self.position_y + y]] if
-                       current_list[self.position_x + x][self.position_y + y].piece.color_type != self.piece.color_type else [])
+                       current_list[self.position_x + x][
+                           self.position_y + y].piece.color_type != self.piece.color_type else [])
             except Exception:
                 lst = []
             # Проверка на взятие на проходе
@@ -288,7 +295,6 @@ class Cell:
             except Exception:
                 pass
             return lst
-
 
         if isinstance(self.piece, Pawn):
             selected_list = straight_pawn_move()
@@ -339,9 +345,10 @@ class Cell:
                              [self.position_x + 1, self.position_y - 1], [self.position_x - 1, self.position_y + 1]]
 
             def check_rook(x_1, y_1, x_2, y_2):
-                none_lst = [current_list[i][y_2].piece for i in range(min(x_1, x_2)+1, max(x_1, x_2))]
+                none_lst = [current_list[i][y_2].piece for i in range(min(x_1, x_2) + 1, max(x_1, x_2))]
                 if isinstance(current_list[x_2][y_2].piece, Rook) and (current_list[x_2][y_2].piece.n_moves == 0) \
-                        and self.piece.color_type == current_list[x_2][y_2].piece.color_type and all([i == 'None' for i in none_lst]):
+                        and self.piece.color_type == current_list[x_2][y_2].piece.color_type and all(
+                    [i == 'None' for i in none_lst]):
                     return [[x_2, y_2]]
 
             if self.piece.n_moves == 0:
@@ -372,7 +379,7 @@ class Cell:
         for i in reversed(selected_list):
             try:
                 if (current_list[i[0]][i[1]].piece.color_type == self.piece.color_type):
-                    if not(isinstance(self.piece, King) and isinstance(current_list[i[0]][i[1]].piece, Rook)):
+                    if not (isinstance(self.piece, King) and isinstance(current_list[i[0]][i[1]].piece, Rook)):
                         selected_list.remove(i)
             except AttributeError:
                 pass
@@ -400,6 +407,26 @@ class CellList:
                       for column in range(self.ncolumns)] for row in range(self.nrows)]
         return cell_list
 
+    def clear(self):
+        for i in range(len(self.list)):
+            for j in range(len(self.list[i])):
+                self.undraw_now(i, j)
+
+    def show_attacked(self, color_turn):
+        self.clear()
+        for i in range(len(self.list)):
+            for j in self.list[i]:
+                if j.piece != "None":
+                    if j.piece.color_type != color_turn:
+                        selected_list = j.show_variants(self.list)
+                        for i in selected_list:
+                            if self.list[i[0]][i[1]].piece != "None":
+                                if self.list[i[0]][i[1]].piece.color_type == color_turn:
+                                    pygame.draw.rect(self.surface,
+                                                     (250, 158, 124) if (i[0] + i[1]) % 2 == 0 else (102, 21, 23),
+                                                     (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
+                                                      self.cell_size - 1, self.cell_size - 1))
+
     # функция закрашивания клеток возможного хода
     def draw(self):
         cell_list = self.list
@@ -416,7 +443,7 @@ class CellList:
                         if cell_list[i[0]][i[1]].piece != "None":
                             cell_list[row][column], new_cel = new_cel, cell_list[row][column]
                         cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
-                        if not(d[0]) or (d[0] and cell_list[row][column].piece.color_type != d[1]):
+                        if not (d[0]) or (d[0] and cell_list[row][column].piece.color_type != d[1]):
                             pygame.draw.rect(self.surface, (161, 211, 134) if (i[0] + i[1]) % 2 == 0 else (24, 63, 33),
                                              (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
                                               self.cell_size - 1, self.cell_size - 1))
@@ -464,11 +491,11 @@ class CellList:
             self.screen.blit(option_img, option_rect)
             i -= 1
 
-    #функция проверки шаха
+    # функция проверки шаха
     def chess_check(self, cell_list, draw=False, get_color=False):
         color = None
         W = False
-        #cell_list = self.list
+        # cell_list = self.list
         for row in range(len(cell_list)):
             for column in range(len(cell_list[row])):
                 if cell_list[row][column].piece != 'None':
@@ -528,31 +555,32 @@ class CellList:
                         if cell_list[i[0]][i[1]].piece != "None":
                             cell_list[row][column], new_cel = new_cel, cell_list[row][column]
                         cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
-                        if (d[0]) and not(d[0] and cell_list[row][column].piece.color_type != d[1]):
+                        if (d[0]) and not (d[0] and cell_list[row][column].piece.color_type != d[1]):
                             selected_list.remove(i)
 
                     for i in selected_list:
                         # если ход возможен, фигура ходит
                         if i[0] == self.x_n and i[1] == self.y_n:
                             cell_list[row][column].piece.n_moves += 1
-                            #рокировка
-                            if type(cell_list[self.x_pr][self.y_pr].piece) == King and type(cell_list[self.x_n][self.y_n].piece) == Rook:
+                            # рокировка
+                            if type(cell_list[self.x_pr][self.y_pr].piece) == King and type(
+                                    cell_list[self.x_n][self.y_n].piece) == Rook:
                                 rook_pos_x = self.x_n
                                 if self.x_pr < self.x_n:
                                     self.x_n = self.x_pr + 2
-                                    Chess.load_unit(self, (self.x_pr+1, self.y_n),
+                                    Chess.load_unit(self, (self.x_pr + 1, self.y_n),
                                                     cell_list[rook_pos_x][self.y_pr].piece.rect)
-                                    cell_list[self.x_pr+1][self.y_n] = Cell(self.x_pr+1, self.y_n,
-                                                                         cell_list[rook_pos_x][self.y_pr].piece,
-                                                                         'Unselected')
+                                    cell_list[self.x_pr + 1][self.y_n] = Cell(self.x_pr + 1, self.y_n,
+                                                                              cell_list[rook_pos_x][self.y_pr].piece,
+                                                                              'Unselected')
 
                                 else:
                                     self.x_n = self.x_pr - 2
-                                    Chess.load_unit(self, (self.x_pr-1, self.y_n),
+                                    Chess.load_unit(self, (self.x_pr - 1, self.y_n),
                                                     cell_list[rook_pos_x][self.y_pr].piece.rect)
-                                    cell_list[self.x_pr-1][self.y_n] = Cell(self.x_pr-1, self.y_n,
-                                                                         cell_list[rook_pos_x][self.y_pr].piece,
-                                                                         'Unselected')
+                                    cell_list[self.x_pr - 1][self.y_n] = Cell(self.x_pr - 1, self.y_n,
+                                                                              cell_list[rook_pos_x][self.y_pr].piece,
+                                                                              'Unselected')
                             # уничтожение атакованной фигуры
                             try:
                                 if cell_list[self.x_n][self.y_n].piece != 'None':
@@ -572,12 +600,13 @@ class CellList:
                                                                  cell_list[self.x_pr][self.y_pr].piece, 'Unselected')
                             self.move_not = False
                             if type(cell_list[self.x_n][self.y_n].piece == Pawn):
-                                #Запоминание на сколько клеток сделала пешка ход (для взятия на проходе)
+                                # Запоминание на сколько клеток сделала пешка ход (для взятия на проходе)
                                 self.list[self.x_n][self.y_n].piece.previous_move = abs(self.y_n - self.y_pr)
                                 if (self.y_n == 0 or self.y_n == 7):
                                     cell_list[self.x_n][self.y_n].piece.ch = (self.x_n, self.y_n)
 
-                            if type(cell_list[self.x_pr][self.y_pr].piece) == King and cell_list[self.x_pr][self.y_pr].piece.n_moves == 1:
+                            if type(cell_list[self.x_pr][self.y_pr].piece) == King and cell_list[self.x_pr][
+                                self.y_pr].piece.n_moves == 1:
                                 self.undraw_now(0, 7)
                                 self.undraw_now(7, 7)
                                 self.undraw_now(7, 0)
@@ -598,6 +627,7 @@ class CellList:
         pygame.draw.rect(self.surface, (192, 192, 192) if (i[0] + i[1]) % 2 == 0 else (21, 34, 45),
                          (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
                           self.cell_size - 1, self.cell_size - 1))
+
     # мат
     def checkmate(self, color):
         cell_list = self.list
@@ -615,7 +645,7 @@ class CellList:
                         if cell_list[i[0]][i[1]].piece != "None":
                             cell_list[row][column], new_cel = new_cel, cell_list[row][column]
                         cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
-                        if (d[0]) and not(d[0] and cell_list[row][column].piece.color_type != d[1]):
+                        if (d[0]) and not (d[0] and cell_list[row][column].piece.color_type != d[1]):
                             selected_list.remove(i)
                     if len(selected_list) != 0:
                         chess_counter += 1
@@ -624,7 +654,6 @@ class CellList:
             return (True, color)
         else:
             return (False, None)
-
 
 
 # класс игры
@@ -648,6 +677,7 @@ class Life:
         # создание списка ячеек
         self.cell_table = CellList(self.surface1, self.cell_size, 8, 8)
         self.surface2 = pygame.display.set_mode(self.screen_size)
+        self.attacks = False
 
     # функция прорисовки линий внутри поля
     def make_lines(self):
@@ -658,14 +688,13 @@ class Life:
         for y in range(70, 71 + self.cell_size * 8, self.cell_size):
             pygame.draw.line(self.screen, pygame.Color('black'), (70, y), (70 + self.cell_size * 8, y), 4)
 
-
     # функция создания клеток доски
     def make_board(self, number_of_moves):
         numbers_list = ['8', '7', '6', '5', '4', '3', '2', '1']
         letters_list = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
         # self.cell_table = []
         # self.cell_list = []
-        self.number_of_moves_def = number_of_moves //2
+        self.number_of_moves_def = number_of_moves // 2
         for x in range(8):
             for y in range(8):
                 # self.cell_list.append(Cell(x, y))
@@ -705,31 +734,33 @@ class Life:
             options = ['new_game.png', 'new_pieces.png']
             for name in options:
                 option_img = pygame.image.load(os.path.join(img_folder, name)).convert_alpha()
-                option_img = pygame.transform.scale(option_img, (game.cell_size // 1.2, game.cell_size // 1.2))
+                option_img = pygame.transform.scale(option_img,
+                                                    (int(game.cell_size // 1.2), int(game.cell_size // 1.2)))
                 option_rect = option_img.get_rect()
                 if name == 'new_game.png':
                     option_rect.topleft = (6, 8)
                 elif name == 'new_pieces.png':
-                    option_rect.topleft = (self.width - 2 - game.cell_size // 1.2, 8)
+                    option_rect.topleft = (self.width - 2 - int(game.cell_size // 1.2), 8)
                 self.screen.blit(option_img, option_rect)
 
         else:
             options = ['new_game.png', 'new_pieces_na.png']
             for name in options:
 
-
                 option_img = pygame.image.load(os.path.join(img_folder, name)).convert_alpha()
-                option_img = pygame.transform.scale(option_img, (game.cell_size // 1.2, game.cell_size // 1.2))
+                option_img = pygame.transform.scale(option_img,
+                                                    (int(game.cell_size // 1.2), int(game.cell_size // 1.2)))
                 option_rect = option_img.get_rect()
 
-                pygame.draw.rect(self.screen, (121, 121, 121),(self.width - 9 - game.cell_size // 1.2, 0, self.cell_size, self.cell_size))
+                pygame.draw.rect(self.screen, (121, 121, 121),
+                                 (self.width - 9 - int(game.cell_size // 1.2), 0, self.cell_size, self.cell_size))
 
                 if name == 'new_game.png':
                     option_rect.topleft = (6, 8)
                 elif name == 'new_pieces_na.png':
-                    option_rect.topleft = (self.width - 2 - game.cell_size // 1.2, 8)
+                    option_rect.topleft = (self.width - 2 - int(game.cell_size // 1.2), 8)
                 self.screen.blit(option_img, option_rect)
-        #обновление количества ходов
+        # обновление количества ходов
         number_txt = str(self.number_of_moves_def)
         text_number = font.render(number_txt, True, (255, 255, 255))
         if self.number_of_moves_def < 10:
@@ -743,9 +774,6 @@ class Life:
                           79 + self.cell_size * 8, self.cell_size,
                           self.cell_size), )
         self.screen.blit(text_number, text_number_pos)
-
-
-
 
     # функция проверки пешки на краю доски
     def choose(self):
@@ -783,6 +811,7 @@ class Life:
                         i -= 1
                     W = piece
         return W
+
     def win(self, color):
 
         self.color = color
@@ -821,17 +850,22 @@ class Life:
         pygame.draw.rect(self.screen, (121, 121, 121),
                          (self.width // 2 - 2 * self.cell_size + 1,
                           self.height // 2 - 0.48 * self.cell_size - 5, self.cell_size * 4,
-                          self.cell_size * 2))
+                          self.cell_size * 3))
+
+        pygame.draw.line(self.screen, (0, 0, 0), [self.width // 2 - 2 * self.cell_size, 70 + self.cell_size * 5], [self.width // 2 + 2 * self.cell_size, 70 + self.cell_size * 5], 6)
+
+
         pygame.draw.rect(self.screen, (0, 0, 0),
                          (self.width // 2 - 2 * self.cell_size + 1,
                           self.height // 2 - 0.48 * self.cell_size - 5,
-                          self.cell_size * 4, self.cell_size * 2), 4)
+                          self.cell_size * 4, self.cell_size * 3), 4)
         pygame.font.init()
         font = pygame.font.Font('GorgeousPixel.ttf', 60)
         text_choose = 'Pawns:'
         text_chose_f = font.render(text_choose, True, (0, 0, 0))
         text_choose_pos = (self.width // 2 - self.cell_size * 1.5, self.height // 2 - self.cell_size * 0.5)
         self.screen.blit(text_chose_f, text_choose_pos)
+        #print("here")
         if self.color == 'black':
             options = ['pawn_b.png', 'pawn_b_2.png', 'pawn_b_3.png', 'pawn_b_4.png']
         else:
@@ -845,6 +879,14 @@ class Life:
                 self.width // 2 - i * self.cell_size, self.height // 2 + self.cell_size * 1.35)
             self.screen.blit(option_img, option_rect)
             i -= 1
+        font = pygame.font.Font('GorgeousPixel.ttf', 60)
+        text_attack = 'Attacks'
+        if not self.attacks:
+            text_attack_r = font.render(text_attack, True, (0, 0, 0))
+        else:
+            text_attack_r = font.render(text_attack, True, (255, 255, 255))
+        text_attack_pos = (self.width // 2 - self.cell_size * 1.55, self.height // 2 + self.cell_size * 1.43)
+        self.screen.blit(text_attack_r, text_attack_pos)
 
     # функция первоначального размещения фигур на доске
     def make_units(self):
@@ -926,7 +968,8 @@ class Life:
             return True
         else:
             pygame.draw.rect(self.screen, (121, 121, 121),
-                             (self.width - 10 - game.cell_size // 1.6, 75 + self.cell_size * 8, self.cell_size * 1.2, self.cell_size * 1.2))
+                             (self.width - 10 - game.cell_size // 1.6, 75 + self.cell_size * 8, self.cell_size * 1.2,
+                              self.cell_size * 1.2))
             return False
 
     def draw(self):
@@ -955,8 +998,6 @@ class Life:
                 self.width // 2 - i * self.cell_size, self.height // 2 + self.cell_size * 1.35)
             self.screen.blit(option_img, option_rect)
             i -= 1
-
-
 
     # запуск иггры
     def run_game(self):
@@ -1016,7 +1057,8 @@ class Life:
                                 if x_pos == 5:
                                     new_piece = Knight(self.color)
                             if new_piece != None:
-                                self.cell_table.list[piece.ch[0]][piece.ch[1]] = Cell(piece.ch[0], piece.ch[1], new_piece)
+                                self.cell_table.list[piece.ch[0]][piece.ch[1]] = Cell(piece.ch[0], piece.ch[1],
+                                                                                      new_piece)
                                 Chess.load_unit(self, piece.ch, new_piece.rect)
                                 piece.kill()
                                 self.all_sprites.add(new_piece)
@@ -1045,7 +1087,6 @@ class Life:
                                             new_piece_b = Pawn_4('black')
                                             new_piece_w = Pawn_4('white')
 
-
                                         self.cell_table.list[x][1].piece.kill()
                                         self.cell_table.list[x][1] = Cell(x, 1, new_piece_b)
 
@@ -1064,8 +1105,10 @@ class Life:
 
                                         Touch = False
                                         press_key = (None, None)
-                                else:
-                                    pass
+                                elif 2 <= x_pos <= 5 and y_pos == 5:
+                                    self.attacks = False if self.attacks else True
+
+                                    Touch = False
 
                             # нажатия на клетки поля
                             elif 0 <= x_pos <= 7 and 0 <= y_pos <= 7:
@@ -1082,13 +1125,13 @@ class Life:
 
                                         self.cell_table.list[press_key[0]][press_key[1]].state = 'Move'
 
-                                        #if (self.cell_table.list[x_pos][y_pos].piece != 'None' and \
-                                            #    self.cell_table.list[press_key[0]][press_key[1]].piece != 'None') or \
-                                           #     (type(self.cell_table.list[press_key[0]][press_key[1]].piece) == Pawn  and (self.cell_table.list[x_pos][y_pos].piece == 'None' or (self.cell_table.list[x_pos][y_pos].piece != 'None' and self.cell_table.list[x_pos][y_pos].piece.color_type != self.cell_table.list[press_key[0]][press_key[1]].piece.color_type))) or \
-                                           #     type(self.cell_table.list[press_key[0]][press_key[1]].piece) == Pawn_2 or \
-                                            ##    type(self.cell_table.list[press_key[0]][press_key[1]].piece) == Pawn_3:
+                                        # if (self.cell_table.list[x_pos][y_pos].piece != 'None' and \
+                                        #    self.cell_table.list[press_key[0]][press_key[1]].piece != 'None') or \
+                                        #     (type(self.cell_table.list[press_key[0]][press_key[1]].piece) == Pawn  and (self.cell_table.list[x_pos][y_pos].piece == 'None' or (self.cell_table.list[x_pos][y_pos].piece != 'None' and self.cell_table.list[x_pos][y_pos].piece.color_type != self.cell_table.list[press_key[0]][press_key[1]].piece.color_type))) or \
+                                        #     type(self.cell_table.list[press_key[0]][press_key[1]].piece) == Pawn_2 or \
+                                        ##    type(self.cell_table.list[press_key[0]][press_key[1]].piece) == Pawn_3:
 
-                                           # Q_50 = True
+                                        # Q_50 = True
                                         if type(self.cell_table.list[press_key[0]][press_key[1]].piece) == Pawn or \
                                                 self.cell_table.list[x_pos][y_pos].piece != 'None':
                                             Q_50 = True
@@ -1098,9 +1141,9 @@ class Life:
                                             self.cell_table.list[press_key[0]][press_key[1]].state = 'Unselected'
                                             self.cell_table.draw()
                                             self.cell_table.list[press_key[0]][press_key[1]] = Cell(press_key[0],
-                                                                                                    press_key[1], 'None',
+                                                                                                    press_key[1],
+                                                                                                    'None',
                                                                                                     'Unselected')
-
 
                                             self.cell_table.undraw_now(x_pos, y_pos)
 
@@ -1112,11 +1155,15 @@ class Life:
 
                                             Q += 1
 
-                                            turn = ("white" if turn =="black" else "black")
+                                            turn = ("white" if turn == "black" else "black")
+
+                                            if self.attacks:
+                                                self.cell_table.show_attacked(turn)
                                         else:
                                             try:
                                                 if self.cell_table.list[x_pos][y_pos].piece.color_type == turn:
-                                                    self.cell_table.list[press_key[0]][press_key[1]].state = 'Unselected'
+                                                    self.cell_table.list[press_key[0]][
+                                                        press_key[1]].state = 'Unselected'
                                                     self.cell_table.draw()
                                                     self.cell_table.list[x_pos][y_pos].state = 'Selected'
                                                     press_key = (x_pos, y_pos)
@@ -1157,7 +1204,6 @@ class Life:
                                 press_key = (None, None)
 
                 # self.all_sprites.update()
-
 
             # проверка на пешку в последнем ряду
             if mouse_click:
@@ -1200,7 +1246,7 @@ class Life:
                 pygame.display.flip()
                 mouse_click = False
             clock.tick(self.fps)
-        #pygame.quit()
+        # pygame.quit()
         return new
 
 
