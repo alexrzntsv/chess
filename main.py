@@ -1226,8 +1226,9 @@ class Life:
                 else:
                     self.make_board(self.number_of_moves)
                     self.cell_table.chess_check(self.cell_table.list, draw=True)
-                    self.cell_table.draw_check()
+
                     self.cell_table.draw()
+                    self.cell_table.draw_check()
                     self.moves_of_50(moves_of_50_count)
                     self.screen.blit(self.surface1, (0, 0))
                     self.all_sprites.draw(self.screen)
