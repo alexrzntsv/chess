@@ -1161,14 +1161,21 @@ class Life:
 
                                             if self.attacks:
                                                 self.cell_table.show_attacked(turn)
+
+                                        elif  self.cell_table.list[x_pos][y_pos].piece == 'None' or self.cell_table.list[x_pos][y_pos].piece.color_type != turn:
+                                            self.cell_table.list[press_key[0]][press_key[1]].state = 'Unselected'
+                                            self.cell_table.draw()
+                                            press_key = (x_pos, y_pos)
+
                                         else:
                                             try:
                                                 if self.cell_table.list[x_pos][y_pos].piece.color_type == turn:
-                                                    self.cell_table.list[press_key[0]][
-                                                        press_key[1]].state = 'Unselected'
-                                                    self.cell_table.draw()
+
+                                                    self.cell_table.list[press_key[0]][press_key[1]].state = 'Unselected'
                                                     self.cell_table.list[x_pos][y_pos].state = 'Selected'
+                                                    self.cell_table.draw()
                                                     press_key = (x_pos, y_pos)
+
                                             except AttributeError:
                                                 pass
                                         if Q == 2:
