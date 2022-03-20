@@ -379,7 +379,8 @@ class Cell:
         for i in reversed(selected_list):
             try:
                 if (current_list[i[0]][i[1]].piece.color_type == self.piece.color_type):
-                    if not (isinstance(self.piece, King) and isinstance(current_list[i[0]][i[1]].piece, Rook)):
+                    if not (isinstance(self.piece, King) and isinstance(current_list[i[0]][i[1]].piece, Rook) and
+                            self.piece.n_moves == 0 and current_list[i[0]][i[1]].piece.n_moves == 0):
                         selected_list.remove(i)
             except AttributeError:
                 pass
