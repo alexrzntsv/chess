@@ -565,7 +565,8 @@ class CellList:
                             cell_list[row][column].piece.n_moves += 1
                             # рокировка
                             if type(cell_list[self.x_pr][self.y_pr].piece) == King and type(
-                                    cell_list[self.x_n][self.y_n].piece) == Rook:
+                                    cell_list[self.x_n][self.y_n].piece) == Rook and \
+                                    cell_list[self.x_pr][self.y_pr].piece.color_type == cell_list[self.x_n][self.y_n].piece.color_type:
                                 rook_pos_x = self.x_n
                                 if self.x_pr < self.x_n:
                                     self.x_n = self.x_pr + 2
