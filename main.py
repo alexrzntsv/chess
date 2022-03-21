@@ -187,26 +187,12 @@ class Cell:
         self.state = state
         self.state_check = state_check
         self.state_piece = state_piece
-        # if self.piece != "None":
-        # self.desribtion = (str(self.position_x) + " " + str(self.position_y) + " " + self.piece.description)
-        # else: self.desribtion = (str(self.position_x) + " " + str(self.position_y) + " " + self.piece)
 
     # возвращает позицию клетки
     def position(self):
         return (70 + self.position_x * game.cell_size + game.cell_size // 3,
                 70 + self.position_y * game.cell_size + game.cell_size // 3)
 
-    # def update(self, new_piece):
-    # self.previous = self.piece
-    # self.piece = new_piece
-    # Chess.load_unit(self, (self.position_x, self.position_y), self.piece.rect)
-
-    # def load_previous(self):
-    # if self.previous != "None":
-    # self.piece = self.previous
-    # self.previous = "None"
-    # Chess.load_unit(self, (self.position_x, self.position_y), self.piece.rect)
-    # else: print("Ошибка")
 
     # функция, определяющая возможные ходы для фигуры
     def show_variants(self, current_list):
@@ -387,10 +373,6 @@ class Cell:
 
         return selected_list
 
-    # def delete(self):
-    # self.previous = self.piece
-    # self.piece == "None"
-
 
 # класс списка всех ячеек
 class CellList:
@@ -527,7 +509,6 @@ class CellList:
     def chess_check(self, cell_list, draw=False, get_color=False):
         color = None
         W = False
-        # cell_list = self.list
         for row in range(len(cell_list)):
             for column in range(len(cell_list[row])):
                 if cell_list[row][column].piece != 'None':
@@ -598,6 +579,7 @@ class CellList:
                                     cell_list[self.x_pr + 1][self.y_n] = Cell(self.x_pr + 1, self.y_n,
                                                                               cell_list[rook_pos_x][self.y_pr].piece,
                                                                               'Unselected')
+                                    self.undraw_now(self.x_pr + 1, self.y_n)
                                 else:
                                     self.x_n = self.x_pr - 2
                                     Chess.load_unit(self, (self.x_pr - 1, self.y_n),
@@ -605,6 +587,7 @@ class CellList:
                                     cell_list[self.x_pr - 1][self.y_n] = Cell(self.x_pr - 1, self.y_n,
                                                                               cell_list[rook_pos_x][self.y_pr].piece,
                                                                               'Unselected')
+                                    self.undraw_now(self.x_pr - 1, self.y_n)
                             # уничтожение атакованной фигуры
                             try:
                                 if cell_list[self.x_n][self.y_n].piece != 'None':
@@ -716,16 +699,11 @@ class Life:
     def make_board(self, number_of_moves):
         numbers_list = ['8', '7', '6', '5', '4', '3', '2', '1']
         letters_list = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-        # self.cell_table = []
-        # self.cell_list = []
         self.number_of_moves_def = number_of_moves // 2
         for x in range(8):
             for y in range(8):
-                # self.cell_list.append(Cell(x, y))
                 pygame.draw.rect(self.screen, (192, 192, 192) if (x + y) % 2 == 0 else (21, 34, 45),
                                  (70 + self.cell_size * x, 70 + self.cell_size * y, self.cell_size, self.cell_size))
-            # self.cell_table.append(self.cell_list)
-            # self.cell_list=[]
         # добавление текста
         pygame.font.init()
         font = pygame.font.Font('GorgeousPixel.ttf', 30)
@@ -889,7 +867,6 @@ class Life:
         text_chose_f = font.render(text_choose, True, (0, 0, 0))
         text_choose_pos = (self.width // 2 - self.cell_size * 1.5, self.height // 2 - self.cell_size * 0.5)
         self.screen.blit(text_chose_f, text_choose_pos)
-        #print("here")
         if self.color == 'black':
             options = ['pawn_b.png', 'pawn_b_2.png', 'pawn_b_3.png', 'pawn_b_4.png']
         else:
@@ -1149,13 +1126,6 @@ class Life:
 
                                         self.cell_table.list[press_key[0]][press_key[1]].state = 'Move'
 
-                                        # if (self.cell_table.list[x_pos][y_pos].piece != 'None' and \
-                                        #    self.cell_table.list[press_key[0]][press_key[1]].piece != 'None') or \
-                                        #     (type(self.cell_table.list[press_key[0]][press_key[1]].piece) == Pawn  and (self.cell_table.list[x_pos][y_pos].piece == 'None' or (self.cell_table.list[x_pos][y_pos].piece != 'None' and self.cell_table.list[x_pos][y_pos].piece.color_type != self.cell_table.list[press_key[0]][press_key[1]].piece.color_type))) or \
-                                        #     type(self.cell_table.list[press_key[0]][press_key[1]].piece) == Pawn_2 or \
-                                        ##    type(self.cell_table.list[press_key[0]][press_key[1]].piece) == Pawn_3:
-
-                                        # Q_50 = True
                                         if type(self.cell_table.list[press_key[0]][press_key[1]].piece) == Pawn or \
                                                 self.cell_table.list[x_pos][y_pos].piece != 'None':
                                             Q_50 = True
@@ -1234,7 +1204,6 @@ class Life:
                                     self.cell_table.list[press_key[0]][press_key[1]].state = 'Unselected'
                                 press_key = (None, None)
 
-                # self.all_sprites.update()
 
             # проверка на пешку в последнем ряду
             if mouse_click:
@@ -1273,12 +1242,9 @@ class Life:
                         self.draw()
                         Draw = True
 
-                # self.choose('black')
-                # self.choose('white')
                 pygame.display.flip()
                 mouse_click = False
             clock.tick(self.fps)
-        # pygame.quit()
         return new
 
 
