@@ -428,6 +428,44 @@ class CellList:
                                                      (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
                                                       self.cell_size - 1, self.cell_size - 1))
 
+    def change_places(self, row, column, i ):
+        cell_list = self.list
+        castling = (type(cell_list[row][column].piece) == King and type(
+            cell_list[i[0]][i[1]].piece) == Rook and \
+                    cell_list[row][column].piece.color_type == cell_list[i[0]][
+                        i[1]].piece.color_type)
+        cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
+        if cell_list[i[0]][i[1]].piece != "None":
+            if not castling:
+                new_cel = Cell()
+                cell_list[row][column], new_cel = new_cel, cell_list[row][column]
+            else:
+                if i[0] < row:
+                    cell_list[i[0] + 2][i[1]], cell_list[i[0]][i[1]] = cell_list[i[0]][i[1]], cell_list[i[0] + 2][i[1]]
+                    cell_list[row][column], cell_list[row - 1][column] = cell_list[row - 1][column], \
+                                                                         cell_list[row][column]
+                else:
+                    cell_list[i[0] - 1][i[1]], cell_list[i[0]][i[1]] = cell_list[i[0]][i[1]], \
+                                                                       cell_list[i[0] - 1][i[1]]
+                    cell_list[row][column], cell_list[row + 1][column] = cell_list[row + 1][column], \
+                                                                         cell_list[row][column]
+        d = self.chess_check(cell_list, get_color=True)
+        if cell_list[i[0]][i[1]].piece != "None" or castling:
+            if not castling:
+                cell_list[row][column], new_cel = new_cel, cell_list[row][column]
+            else:
+                if i[0] < row:
+                    cell_list[i[0] + 2][i[1]], cell_list[i[0]][i[1]] = cell_list[i[0]][i[1]], cell_list[i[0] + 2][i[1]]
+                    cell_list[row][column], cell_list[row - 1][column] = cell_list[row - 1][column], \
+                                                                         cell_list[row][column]
+                else:
+                    cell_list[i[0] - 1][i[1]], cell_list[i[0]][i[1]] = cell_list[i[0]][i[1]], \
+                                                                       cell_list[i[0] - 1][i[1]]
+                    cell_list[row][column], cell_list[row + 1][column] = cell_list[row + 1][column], \
+                                                                         cell_list[row][column]
+        cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
+        return d
+
     # функция закрашивания клеток возможного хода
     def draw(self):
         cell_list = self.list
@@ -436,42 +474,7 @@ class CellList:
                 if cell_list[row][column].state == 'Selected' and cell_list[row][column].piece != 'None':
                     selected_list = cell_list[row][column].show_variants(cell_list)
                     for i in selected_list:
-                        castling = (type(cell_list[row][column].piece) == King and type(
-                            cell_list[i[0]][i[1]].piece) == Rook and \
-                                    cell_list[row][column].piece.color_type == cell_list[i[0]][
-                                        i[1]].piece.color_type)
-                        cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
-                        if cell_list[i[0]][i[1]].piece != "None":
-                            if not castling:
-                                new_cel = Cell()
-                                cell_list[row][column], new_cel = new_cel, cell_list[row][column]
-                            else:
-                                if i[0] < row:
-                                    cell_list[i[0] + 2][i[1]], cell_list[i[0]][i[1]] = cell_list[i[0]][i[1]], \
-                                                                                       cell_list[i[0] + 2][i[1]]
-                                    cell_list[row][column], cell_list[row - 1][column] = cell_list[row - 1][column], \
-                                                                                         cell_list[row][column]
-                                else:
-                                    cell_list[i[0] - 1][i[1]], cell_list[i[0]][i[1]] = cell_list[i[0]][i[1]], \
-                                                                                       cell_list[i[0] - 1][i[1]]
-                                    cell_list[row][column], cell_list[row + 1][column] = cell_list[row + 1][column], \
-                                                                                         cell_list[row][column]
-                        d = self.chess_check(cell_list, get_color=True)
-                        if cell_list[i[0]][i[1]].piece != "None" or castling:
-                            if not castling:
-                                cell_list[row][column], new_cel = new_cel, cell_list[row][column]
-                            else:
-                                if i[0] < row:
-                                    cell_list[i[0] + 2][i[1]], cell_list[i[0]][i[1]] = cell_list[i[0]][i[1]], \
-                                                                                       cell_list[i[0] + 2][i[1]]
-                                    cell_list[row][column], cell_list[row - 1][column] = cell_list[row - 1][column], \
-                                                                                         cell_list[row][column]
-                                else:
-                                    cell_list[i[0] - 1][i[1]], cell_list[i[0]][i[1]] = cell_list[i[0]][i[1]], \
-                                                                                       cell_list[i[0] - 1][i[1]]
-                                    cell_list[row][column], cell_list[row + 1][column] = cell_list[row + 1][column], \
-                                                                                         cell_list[row][column]
-                        cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
+                        d = self.change_places(row=row, column=column, i=i)
                         if not (d[0]) or (d[0] and cell_list[row][column].piece.color_type != d[1]):
                             pygame.draw.rect(self.surface, (161, 211, 134) if (i[0] + i[1]) % 2 == 0 else (24, 63, 33),
                                              (i[0] * self.cell_size + 71, i[1] * self.cell_size + 71,
@@ -576,40 +579,7 @@ class CellList:
                 if cell_list[row][column].state == 'Move' and cell_list[self.x_pr][self.y_pr].piece != 'None':
                     selected_list = cell_list[self.x_pr][self.y_pr].show_variants(cell_list)
                     for i in selected_list[:]:
-                        castling = (type(cell_list[row][column].piece) == King and type(
-                            cell_list[i[0]][i[1]].piece) == Rook and \
-                                   cell_list[row][column].piece.color_type == cell_list[i[0]][
-                                       i[1]].piece.color_type)
-                        cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
-                        if cell_list[i[0]][i[1]].piece != "None":
-                            if not castling:
-                                new_cel = Cell()
-                                cell_list[row][column], new_cel = new_cel, cell_list[row][column]
-                            else:
-                                if i[0] < row:
-                                    cell_list[i[0] + 2][i[1]], cell_list[i[0]][i[1]] = cell_list[i[0]][i[1]], cell_list[i[0] + 2][i[1]]
-                                    cell_list[row][column], cell_list[row - 1][column] = cell_list[row - 1][column], \
-                                                                                       cell_list[row][column]
-                                else:
-                                    cell_list[i[0] - 1][i[1]], cell_list[i[0]][i[1]] = cell_list[i[0]][i[1]], \
-                                                                                       cell_list[i[0] - 1][i[1]]
-                                    cell_list[row][column], cell_list[row + 1][column] = cell_list[row + 1][column], \
-                                                                                         cell_list[row][column]
-                        d = self.chess_check(cell_list, get_color=True)
-                        if cell_list[i[0]][i[1]].piece != "None" or castling:
-                            if not castling:
-                                cell_list[row][column], new_cel = new_cel, cell_list[row][column]
-                            else:
-                                if i[0] < row:
-                                    cell_list[i[0] + 2][i[1]], cell_list[i[0]][i[1]] = cell_list[i[0]][i[1]], cell_list[i[0] + 2][i[1]]
-                                    cell_list[row][column], cell_list[row - 1][column] = cell_list[row - 1][column], \
-                                                                                       cell_list[row][column]
-                                else:
-                                    cell_list[i[0] - 1][i[1]], cell_list[i[0]][i[1]] = cell_list[i[0]][i[1]], \
-                                                                                       cell_list[i[0] - 1][i[1]]
-                                    cell_list[row][column], cell_list[row + 1][column] = cell_list[row + 1][column], \
-                                                                                         cell_list[row][column]
-                        cell_list[i[0]][i[1]], cell_list[row][column] = cell_list[row][column], cell_list[i[0]][i[1]]
+                        d = self.change_places(row=row, column=column, i=i)
                         if (d[0]) and not (d[0] and cell_list[row][column].piece.color_type != d[1]):
                             selected_list.remove(i)
                     for i in selected_list:
@@ -628,7 +598,6 @@ class CellList:
                                     cell_list[self.x_pr + 1][self.y_n] = Cell(self.x_pr + 1, self.y_n,
                                                                               cell_list[rook_pos_x][self.y_pr].piece,
                                                                               'Unselected')
-
                                 else:
                                     self.x_n = self.x_pr - 2
                                     Chess.load_unit(self, (self.x_pr - 1, self.y_n),
