@@ -13,3 +13,4 @@
 * сброс игры
 * подсчёт количества ходов
 
+![screen-gif](https://github.com/alexrzntsv/chess/blob/main/Анимация.gif)
